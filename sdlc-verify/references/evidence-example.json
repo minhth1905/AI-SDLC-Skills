@@ -1,0 +1,31 @@
+{
+  "task_id": "DEMO-123",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "targeted specs",
+      "command": "bundle exec rspec spec/requests/example_spec.rb",
+      "status": "passed",
+      "exit_code": 0,
+      "required": true,
+      "observed_at": "2026-10-28T00:00:00Z",
+      "summary": "Example only: replace with actual output"
+    },
+    {
+      "name": "browser smoke",
+      "command": "",
+      "status": "skipped",
+      "exit_code": null,
+      "required": false,
+      "reason": "Example only: no browser environment"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "status": "passed",
+      "evidence": "Example only: test case and observed result"
+    }
+  ],
+  "remaining_risks": []
+}

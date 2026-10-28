@@ -1,0 +1,2 @@
+# Regression strategy
+T1: narrow tests and local smoke. T2: integration and neighboring behavior. T3: realistic failure modes, negative authorization, retries/idempotency, concurrent writes, external side effects, schema compatibility and rollback as relevant. Not every category applies to every task: record why excluded. Prefer reproducible automated checks, then explicit manual QA instructions. Do not run destructive migration or production checks without approval.

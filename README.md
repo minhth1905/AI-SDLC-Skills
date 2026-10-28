@@ -1,4 +1,4 @@
-# AI-SDLC Skills Kit v0.7 — Runner-backed verification
+# AI-SDLC Skills Kit v0.8 — Verified knowledge capture
 
 A risk-adaptive, one-command engineering workflow for Claude Code. **Addy Osmani's agent-skills** supplies optional engineering methods; this repository supplies **workflow orchestration, verifiable evidence contracts and Git-local knowledge capture**.
 
@@ -10,11 +10,11 @@ The orchestrator uses progressive-disclosure decision policies in `sdlc-orchestr
 |---|---|
 | `sdlc-orchestrate` | Risk tiers, approvals, spec/plan/build/review fallback, state and resume |
 | `sdlc-verify` | Risk-based checks, runner provenance, freshness and QA gate |
-| `sdlc-capture` | Curated implementation, decisions and handoff in target project's Git |
+| `sdlc-capture` | Source-grounded, privacy-conscious task knowledge and human handoff in target project's Git |
 
 Community methods (when installed): `spec-driven-development`, `planning-and-task-breakdown`, `incremental-implementation`, `test-driven-development`, `code-review-and-quality`. See [routing policy](sdlc-orchestrate/references/community-skills.md). Without the Addy plugin, the orchestrator uses compact fallback instructions; it does not pretend the community skill ran.
 
-## Install into a Git project
+Capture now uses progressive policies in `sdlc-capture/references/` for source traceability, knowledge selection, privacy, handoff and index maintenance. `context_store.py` checks reported file paths exist and rejects duplicates, but cannot validate every narrative claim.\n\n## Install into a Git project
 
 ```bash
 git clone https://github.com/minhth1905/AI-SDLC-Skills.git

@@ -1,0 +1,2 @@
+# Privacy and sanitization
+Never capture secrets, access tokens, passwords, private keys, customer names, production payloads, raw request/response bodies or full logs. Redact sensitive values **before** creating a manifest. The script uses pattern-based screening, which cannot catch every secret; agent/human inspection remains required. Use repository-relative file paths, sanitized description and bounded summaries. On suspicion of sensitive data, stop rather than recording. Do not treat an automatic regex pass as privacy approval.

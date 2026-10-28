@@ -1,36 +1,29 @@
 ---
 name: sdlc-capture
-description: Capture reviewed task context into the project's Git repository for future engineers and AI sessions. Run after verify and review; never commit or publish automatically.
+description: Curate verified, non-sensitive, Git-local implementation knowledge and human handoff after review.
 ---
-# SDLC Capture — turn delivery into team knowledge
+# SDLC Capture v0.8 — durable context, not chat history
 
-## Trigger and preconditions
-Use at the end of an implementation task, **after** verification and AI review. The task must be `ready_for_human_review`, with `evidence.json` and `review.md`. This does **not** mean QA sign-off, PR approval, merge, or release. For plan-only tasks, do not capture implementation claims.
+**Trigger:** implementation reached `ready_for_human_review` with evidence.json and review.md. Never capture plan-only work as implemented. This status does not mean merged, released, or accepted by human QA.
 
-## Source of truth
-Read the original ticket, `spec.md`, `plan.md`, current git diff/status, `progress.md`, `evidence.json`, and `review.md`. Verify that written artifacts reflect **actual** changes. Never use chat history as the sole evidence.
+## Progressive reference loading
+- Source-to-code checks: `references/source-traceability.md`
+- Choosing what is worth retaining: `references/knowledge-selection.md`
+- Redaction and confidentiality: `references/privacy-and-sanitization.md`
+- Handoff and manual QA: `references/handoff-quality.md`
+- Updating the project index: `references/index-maintenance.md`
+- Input schema example: `references/capture-manifest.json`
 
 ## Procedure
-1. Identify task ID. Use `docs/ai-sdlc/<task-id>/` inside the **target project**, never the shared skills repository.
-2. Extract concise, durable facts: what changed, where, why, key design decisions, tested behavior, known risks, follow-ups and future maintenance pitfalls.
-3. Remove secrets, credentials, private customer information, production payloads, tokens and raw logs. Prefer paths and summaries to copying data. If uncertain, stop for human review.
-4. Draft a curated JSON manifest following `references/capture-manifest.json`; use `scripts/context_store.py` to create `implementation.md`, `decisions.md`, `handoff.md` and update `docs/ai-sdlc/index.md`.
-5. Run `python3 .claude/ai-sdlc/scripts/context_store.py <task-id> --manifest <path> --dry-run` first. Inspect the generated files and review git diff before running without dry-run.
-6. **Do not automatically commit, push or merge.** Add context artifacts to the PR for human review. Document if code changes are uncommitted; a recorded HEAD SHA alone is not proof of the implementation revision.
-7. If a decision is reusable beyond this task, **propose** an ADR or update to `docs/architecture/` or `CLAUDE.md`; do not silently write broad project policy.
+1. Confirm task ID, `state.json`, actual verification evidence and review. Read ticket/spec/plan/progress plus current Git diff/status. If state and working tree conflict, stop and reconcile.
+2. Identify *durable, observed* facts: result, related changed files, non-obvious design decisions, test outcomes, remaining risks, exact next human action. For T1 keep it brief; for T3 include significant safety/rollback decisions.
+3. Compare reported changed files with repository paths and diff. No fabricated test passes, unstated deployment claims, or unrelated paths.
+4. Redact sensitive material before drafting a manifest. Pattern checks are a backup, not a substitute for review. Do not include raw logs/transcripts/customer data.
+5. Prepare JSON matching `references/capture-manifest.json`. Run:
+   `python3 .claude/ai-sdlc/scripts/context_store.py ID --manifest PATH --dry-run`
+   Inspect the proposed outputs, then run without `--dry-run` if accurate.
+6. Inspect `docs/ai-sdlc/ID/{implementation,decisions,handoff}.md` and `docs/ai-sdlc/index.md` in `git diff`. Confirm one index entry per task and clearly distinguished observed facts, residual risks and required human review.
+7. Present next human action. Do not automatically commit, push, merge, deploy or edit project-wide instructions/ADRs.
 
-## Knowledge tiers
-- **Working memory**: `state.json`, `progress.md`; temporary/resumable task state.
-- **Task memory**: `spec.md`, `plan.md`, `implementation.md`, `decisions.md`, `evidence.json`, `review.md`, `handoff.md`; versioned in the project's Git repo.
-- **Project memory**: curated architecture docs and coding conventions; updated only with human approval.
-
-## Quality bar
-- [ ] All statements trace to code, ticket, review or tests
-- [ ] No credentials or sensitive personal data
-- [ ] No invented test passes or release claims
-- [ ] Handoff names concrete next actions and risks
-- [ ] Index has one entry per task
-- [ ] Human reviews knowledge files with the PR
-
-## Anti-patterns
-Do not dump entire chat transcripts, copy CI logs, auto-edit CLAUDE.md for every task, use vector DB for MVP, or claim a generated summary is verified without reviewing the underlying diff.
+## Source of truth and limitations
+State/progress are resumable working memory, not verified long-term facts. Favor current code, approved decisions, review and executable evidence over chat recollection. `context_store.py` validates basic structure and reported file paths, but cannot verify every factual claim, detect every secret, or cryptographically attest tests. Humans review generated knowledge with the PR.

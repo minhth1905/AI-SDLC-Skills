@@ -19,6 +19,8 @@ class CaptureTests(unittest.TestCase):
         (self.folder / "state.json").write_text(json.dumps({"task_id": "TEST-1", "phase": "ready_for_human_review"}))
         (self.folder / "evidence.json").write_text(json.dumps({"task_id": "TEST-1", "status": "passed", "checks": [{"name": "unit", "command": "pytest", "exit_code": 0, "status": "passed"}], "acceptance_criteria": [{"id": "AC1", "status": "passed", "evidence": "unit test"}]}))
         (self.folder / "review.md").write_text("# Review\n")
+        (self.root / "src").mkdir()
+        (self.root / "src/a.py").write_text("print(1)\n")
         self.manifest = self.root / "manifest.json"
         self.manifest.write_text(json.dumps({"task_id": "TEST-1", "title": "Example", "summary": "Implemented feature", "changed_files": ["src/a.py"], "decisions": ["Reuse existing pattern"], "remaining_risks": [], "followups": ["Review PR"]}))
     def run_script(self, *args):
@@ -38,6 +40,18 @@ class CaptureTests(unittest.TestCase):
         m["summary"] = "api_key=abcdefghijklmnop"
         self.manifest.write_text(json.dumps(m))
         self.assertNotEqual(self.run_script().returncode, 0)
+    def test_reject_nonexistent_changed_file(self):
+        m = json.loads(self.manifest.read_text())
+        m["changed_files"] = ["src/missing.py"]
+        self.manifest.write_text(json.dumps(m))
+        self.assertNotEqual(self.run_script().returncode, 0)
+
+    def test_reject_duplicate_changed_file(self):
+        m = json.loads(self.manifest.read_text())
+        m["changed_files"] = ["src/a.py", "src/a.py"]
+        self.manifest.write_text(json.dumps(m))
+        self.assertNotEqual(self.run_script().returncode, 0)
+
     def test_reject_not_ready(self):
         (self.folder / "state.json").write_text(json.dumps({"task_id": "TEST-1", "phase": "building"}))
         self.assertNotEqual(self.run_script().returncode, 0)

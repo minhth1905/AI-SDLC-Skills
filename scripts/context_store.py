@@ -66,20 +66,28 @@ def capture(root, task, manifest, dry_run=False):
     summary = text(m.get("summary"), "summary", True)
     rationale = text(m.get("rationale", ""), "rationale")
     changed = entries(m.get("changed_files", []), "changed_files")
+    if len(set(changed)) != len(changed):
+        fail("Duplicate changed_files entries")
     decisions = entries(m.get("decisions", []), "decisions")
     risks = entries(m.get("remaining_risks", []), "remaining_risks")
     followups = entries(m.get("followups", []), "followups")
     for p in changed:
         if p.startswith(("/", "~")) or ".." in Path(p).parts or "\\" in p:
             fail("Unsafe repository-relative file path")
+    # Check reported implementation paths against the worktree and Git history.
+    for p in changed:
+        tracked = subprocess.run(["git", "ls-files", "--error-unmatch", "--", p], cwd=root, capture_output=True)
+        existing = (root / p).is_file()
+        if not tracked.returncode == 0 and not existing:
+            fail("Changed file not found in repository: " + p)
     proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, text=True, capture_output=True)
     if proc.returncode:
         fail("Cannot resolve git HEAD")
     header = f"# {title} ({task})\n\n"
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    check_lines = [text(f"{c.get('name', 'check')}: {c.get('status')} — {c.get('command', 'not run')}", "check") for c in checks]
+    check_lines = [text(f"{c.get('name', 'check')}: {c.get('status')} (exit {c.get('exit_code', 'n/a')}) — {c.get('command', 'not run')}", "check") for c in checks]
     criteria_lines = [text(f"{c.get('id', c.get('name', 'criterion'))}: {c.get('evidence')}", "criterion") for c in criteria]
-    implementation = header + f"Captured: {stamp}\n\nGit HEAD: `{proc.stdout.strip()}` (not proof implementation is committed)\n\n## Outcome\n{summary}\n\n## Changed files (reported)\n{bullets(changed)}\n\n## Checks (agent-reported)\n{bullets(check_lines)}\n\n## Acceptance criteria\n{bullets(criteria_lines)}\n"
+    implementation = header + f"Captured: {stamp}\n\nGit HEAD: `{proc.stdout.strip()}` (not proof implementation is committed)\n\n## Outcome\n{summary}\n\n## Changed files (reported)\n{bullets(changed)}\n\n## Checks (local evidence; review provenance separately)\n{bullets(check_lines)}\n\n## Acceptance criteria\n{bullets(criteria_lines)}\n"
     decision_doc = header + "## Decisions\n" + (rationale + "\n\n" if rationale else "") + bullets(decisions) + "\n\n## Risks\n" + bullets(risks) + "\n"
     handoff = header + f"## Status\nReady for human PR review; **not merged or released**.\n\n## Outcome\n{summary}\n\n## Next actions\n{bullets(followups)}\n\n## Risks\n{bullets(risks)}\n\n## Read next\n- [Plan](plan.md)\n- [Decisions](decisions.md)\n- [Implementation](implementation.md)\n- [Evidence](evidence.json)\n- [Review](review.md)\n"
     index = root / "docs" / "ai-sdlc" / "index.md"

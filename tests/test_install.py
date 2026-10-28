@@ -16,7 +16,7 @@ class InstallWorkflowTests(unittest.TestCase):
         self.project = Path(self.tmp.name)
         subprocess.run(["git", "init", "-q"], cwd=self.project, check=True)
     def test_install_command_skills_and_scripts(self):
-        installed = module.install(ROOT, self.project)
+        installed = module.install(ROOT, self.project, platform="claude")
         self.assertIn(".claude/commands/sdlc.md", installed)
         self.assertTrue((self.project / ".claude/skills/sdlc-capture/SKILL.md").is_file())
         for name in ("source-traceability.md", "knowledge-selection.md", "privacy-and-sanitization.md", "handoff-quality.md", "index-maintenance.md"):
@@ -32,10 +32,15 @@ class InstallWorkflowTests(unittest.TestCase):
         for name in module.LEGACY_SKILLS:
             self.assertFalse((self.project / ".claude/skills" / name).exists())
     def test_reinstall_requires_force(self):
-        module.install(ROOT, self.project)
+        module.install(ROOT, self.project, platform="claude")
         with self.assertRaisesRegex(ValueError, "Already exists"):
-            module.install(ROOT, self.project)
-        module.install(ROOT, self.project, True)
+            module.install(ROOT, self.project, platform="claude")
+        module.install(ROOT, self.project, True, platform="claude")
+    def test_default_install_is_codex(self):
+        module.install(ROOT, self.project)
+        self.assertTrue((self.project / ".agents/skills/sdlc-orchestrate/SKILL.md").exists())
+        self.assertFalse((self.project / ".claude").exists())
+
     def test_codex_install_is_native_and_does_not_touch_claude(self):
         installed = module.install(ROOT, self.project, platform="codex")
         self.assertIn(".agents/skills/sdlc-orchestrate", installed)
@@ -47,6 +52,9 @@ class InstallWorkflowTests(unittest.TestCase):
         skill = (self.project / ".agents/skills/sdlc-orchestrate/SKILL.md").read_text()
         self.assertIn(".agents/ai-sdlc/scripts/sdlc.py", skill)
         self.assertNotIn(".claude/ai-sdlc/scripts/", skill)
+        self.assertNotIn("{{SDLC_SCRIPT_DIR}}", skill)
+        verify = (self.project / ".agents/skills/sdlc-verify/SKILL.md").read_text()
+        self.assertIn(".agents/ai-sdlc/scripts/verify_runner.py", verify)
         self.assertFalse((self.project / ".claude").exists())
         self.assertFalse((self.project / "AGENTS.md").exists())
 
@@ -59,19 +67,19 @@ class InstallWorkflowTests(unittest.TestCase):
     def test_non_git_target_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaisesRegex(ValueError, "Git repository"):
-                module.install(ROOT, folder)
+                module.install(ROOT, folder, platform="claude")
     def test_explicit_prune_legacy(self):
-        module.install(ROOT, self.project)
+        module.install(ROOT, self.project, platform="claude")
         legacy = self.project / ".claude/skills/sdlc-plan"
         legacy.mkdir(parents=True)
         (legacy / "custom.md").write_text("old")
-        module.install(ROOT, self.project, force=True)
+        module.install(ROOT, self.project, force=True, platform="claude")
         self.assertTrue(legacy.exists())
-        module.install(ROOT, self.project, force=True, prune_legacy=True)
+        module.install(ROOT, self.project, force=True, prune_legacy=True, platform="claude")
         self.assertFalse(legacy.exists())
 
     def test_installed_workflow_has_capture_and_approval(self):
-        module.install(ROOT, self.project)
+        module.install(ROOT, self.project, platform="claude")
         command = (self.project / ".claude/commands/sdlc.md").read_text()
         self.assertIn("context_store.py", command)
         self.assertIn("--human-approved", command)

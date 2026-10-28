@@ -1,6 +1,6 @@
 # Execution policy — fast path without losing control
 
-Before each phase, read `community-skills.md` and confirm actual availability of the relevant Addy skill. Use it for specialist method only when available; otherwise use the orchestrator fallback and note which was used in progress.md. Do not spawn subagents by default.
+Before each phase, read `community-skills.md` and confirm actual availability of the relevant Addy skill. If installed and readable, MUST use its methodology for that phase. Fallback ONLY after verified unavailability; record phase, skill, availability, outcome and reason in progress.md. Unknown availability or incompatible mandatory instructions require investigation or human decision, not silent fallback. Do not spawn subagents by default.
 
 ## Phase boundaries
 - T1: short plan -> build -> targeted verify -> focused review; no ceremonial spec or approval when implementation explicitly requested.

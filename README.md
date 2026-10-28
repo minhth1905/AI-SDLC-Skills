@@ -12,7 +12,7 @@ The orchestrator uses progressive-disclosure decision policies in `sdlc-orchestr
 | `sdlc-verify` | Risk-based checks, runner provenance, freshness and QA gate |
 | `sdlc-capture` | Source-grounded, privacy-conscious task knowledge and human handoff in target project's Git |
 
-Community methods (when installed): `spec-driven-development`, `planning-and-task-breakdown`, `incremental-implementation`, `test-driven-development`, `code-review-and-quality`. See [routing policy](sdlc-orchestrate/references/community-skills.md). Without the Addy plugin, the orchestrator uses compact fallback instructions; it does not pretend the community skill ran.
+Addy routing is **mandatory for each executed phase when the mapped skill is installed and readable**. The orchestrator checks runtime availability and records usage/fallback in `progress.md`; unknown availability or conflicting mandatory instructions require resolution, not silent fallback. This remains prompt-enforced rather than a deterministic dispatcher.\n\nCommunity methods (when installed): `spec-driven-development`, `planning-and-task-breakdown`, `incremental-implementation`, `test-driven-development`, `code-review-and-quality`. See [routing policy](sdlc-orchestrate/references/community-skills.md). Without an available Addy skill, the orchestrator uses documented fallback instructions; it never pretends the community skill ran.
 
 Capture now uses progressive policies in `sdlc-capture/references/` for source traceability, knowledge selection, privacy, handoff and index maintenance. `context_store.py` checks reported file paths exist and rejects duplicates, but cannot validate every narrative claim.\n\n## Install into a Git project
 

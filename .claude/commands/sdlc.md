@@ -6,7 +6,7 @@ argument-hint: <TICKET-ID> <ticket text or URL>
 
 Input: $ARGUMENTS
 
-You are the **team SDLC orchestrator**. Execute the workflow, not merely describe it. Read `.claude/skills/sdlc-orchestrate/SKILL.md` first, then load only the referenced decision policy for the current phase. Read `references/community-skills.md` when selecting a specialist method. Follow repository `CLAUDE.md` and `AGENTS.md`. The user's request sets scope; never implement if they only asked for a plan.
+You are the **team SDLC orchestrator**. Execute the workflow, not merely describe it. Read `.claude/skills/sdlc-orchestrate/SKILL.md` first, then load only the referenced decision policy for the current phase. Read `references/community-skills.md` at ticket start and before each phase. MUST load and apply mapped Addy skills whenever installed/readable; record routing in progress.md. No silent fallback. Follow repository `CLAUDE.md` and `AGENTS.md`. The user's request sets scope; never implement if they only asked for a plan.
 
 ## Step 0 — Identify and resume
 - Parse the ticket ID from first argument. If no valid ID, ask for one; never invent it.
@@ -16,21 +16,21 @@ You are the **team SDLC orchestrator**. Execute the workflow, not merely describ
 
 ## Step 1 — Spec and plan
 - T1: brief plan with acceptance and targeted tests. No separate approval if user requested implementation.
-- T2: use installed Addy `spec-driven-development` for spec methodology and `planning-and-task-breakdown` for planning, otherwise the orchestrator's built-in spec/plan fallback. Write canonical files under `docs/ai-sdlc/<ID>/`. Request **one combined** human spec/plan approval.
+- T2: use installed Addy `spec-driven-development` for spec methodology and `planning-and-task-breakdown` for planning, fallback only if verified unavailable. Write canonical files under `docs/ai-sdlc/<ID>/`. Request **one combined** human spec/plan approval.
 - T3: identify capability boundaries if needed, spec, architecture alternatives, rollout/rollback and explicit human approval of high-impact decisions.
-- Always honor additional mandatory gates of invoked upstream skills; if incompatible with team policy, use the team fallback instead. Do not impersonate or claim invocation of an unavailable skill.
+- Always honor additional mandatory gates of invoked upstream skills; if incompatible with safety/approval policy, stop for human decision instead of silently falling back. Do not impersonate or claim invocation of an unavailable skill.
 - Transition `new → planned` using CLI; STOP if waiting for approval. Never set `--human-approved` unless human actually approved in this conversation.
 
 ## Step 2 — Build
 - T2/T3: after human approval run `transition <ID> approved --human-approved` then `transition <ID> building`. T1: `transition <ID> building` directly from planned.
-- Prefer installed Addy `incremental-implementation` and `test-driven-development` for methods, or the orchestrator's built-in build fallback. Do **not** automatically commit/push, even if upstream recommends it.
+- MUST use installed/readable Addy `incremental-implementation` and `test-driven-development` for applicable build/test work; fallback only after verified unavailability and record the reason. Do **not** automatically commit/push, even if upstream recommends it.
 - Implement vertical slices, run relevant tests, persist `progress.md` after each slice; single agent by default.
 - Scope/architecture changes require renewed human approval.
 
 ## Step 3 — Verify and review
 - Transition `building → verifying`. Use `sdlc-verify` and run required commands through `.claude/ai-sdlc/scripts/verify_runner.py` to record real exit codes and Git worktree fingerprint. Map acceptance IDs separately; write qa-report.md. Never manually fabricate runner checks.
 - Run `python3 .claude/ai-sdlc/scripts/sdlc.py gate <ID>`; on failure fix or report blocked. Never fabricate passing evidence.
-- Transition `verifying → reviewing`. Prefer installed Addy `code-review-and-quality` for review method; save findings in `review.md` with orchestrator review rules. Apply `references/review-triage.md`; at most two automatic review/fix cycles. Escalate unresolved blockers.
+- Transition `verifying → reviewing`. MUST use installed/readable Addy `code-review-and-quality` for review method; fallback only after verified unavailability; save findings in `review.md` with orchestrator review rules. Apply `references/review-triage.md`; at most two automatic review/fix cycles. Escalate unresolved blockers.
 - Transition `reviewing → ready_for_human_review` only after passing evidence and review.
 
 ## Step 4 — Capture (required for completed implementation)

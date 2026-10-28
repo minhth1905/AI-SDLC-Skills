@@ -11,16 +11,23 @@ LEGACY_SKILLS = ("sdlc-spec", "sdlc-plan", "sdlc-build", "sdlc-review")
 SCRIPTS = ("sdlc.py", "context_store.py", "verify_runner.py")
 HOOKS = ("guard.py", "stop.py")
 
-def install(source, target, force=False, prune_legacy=False):
+def install(source, target, force=False, prune_legacy=False, platform="claude"):
+    if platform not in ("claude", "codex", "both"):
+        raise ValueError("platform must be claude, codex or both")
     source, target = Path(source).resolve(), Path(target).resolve()
     if not (source / ".claude/commands/sdlc.md").is_file():
         raise ValueError("Run installer from the AI-SDLC-Skills repository")
     if subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=target, capture_output=True).returncode:
         raise ValueError("Target must be inside a Git repository")
-    paths = [(source / name, target / ".claude/skills" / name) for name in SKILLS]
-    paths += [(source / "scripts" / name, target / ".claude/ai-sdlc/scripts" / name) for name in SCRIPTS]
-    paths += [(source / "hooks" / name, target / ".claude/ai-sdlc/hooks" / name) for name in HOOKS]
-    paths.append((source / ".claude/commands/sdlc.md", target / ".claude/commands/sdlc.md"))
+    paths = []
+    if platform in ("claude", "both"):
+        paths += [(source / name, target / ".claude/skills" / name) for name in SKILLS]
+        paths += [(source / "scripts" / name, target / ".claude/ai-sdlc/scripts" / name) for name in SCRIPTS]
+        paths += [(source / "hooks" / name, target / ".claude/ai-sdlc/hooks" / name) for name in HOOKS]
+        paths.append((source / ".claude/commands/sdlc.md", target / ".claude/commands/sdlc.md"))
+    if platform in ("codex", "both"):
+        paths += [(source / name, target / ".agents/skills" / name) for name in SKILLS]
+        paths += [(source / "scripts" / name, target / ".agents/ai-sdlc/scripts" / name) for name in SCRIPTS]
     for src, dst in paths:
         if not src.exists():
             raise ValueError("Missing source: " + str(src))
@@ -34,10 +41,15 @@ def install(source, target, force=False, prune_legacy=False):
             shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
+        if platform in ("codex", "both") and ".agents/skills/" in str(dst) and dst.is_dir():
+            # Keep the repository canonical source platform-neutral; adapt installed copies.
+            for md in dst.rglob("*.md"):
+                original = md.read_text(encoding="utf-8")
+                md.write_text(original.replace(".claude/ai-sdlc/scripts/", ".agents/ai-sdlc/scripts/").replace(".claude/skills/", ".agents/skills/"), encoding="utf-8")
     installed = [str(dst.relative_to(target)) for _, dst in paths]
     if prune_legacy:
         for name in LEGACY_SKILLS:
-            legacy = target / ".claude/skills" / name
+            legacy = target / (".agents/skills" if platform == "codex" else ".claude/skills") / name
             if legacy.is_symlink():
                 raise ValueError("Refusing to remove symlink: " + str(legacy))
             if legacy.is_dir():
@@ -48,17 +60,22 @@ def install(source, target, force=False, prune_legacy=False):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", default=".", help="Target Git project root")
+    parser.add_argument("--platform", choices=("claude", "codex", "both"), default="claude", help="Install for Claude Code, Codex or both")
     parser.add_argument("--force", action="store_true", help="Overwrite previously installed AI-SDLC files")
     parser.add_argument("--prune-legacy", action="store_true", help="Explicitly delete four obsolete installed skill directories; review local changes first")
     args = parser.parse_args()
     try:
-        for path in install(Path(__file__).resolve().parents[1], args.target, args.force, args.prune_legacy):
+        for path in install(Path(__file__).resolve().parents[1], args.target, args.force, args.prune_legacy, args.platform):
             print("Installed:", path)
     except (ValueError, OSError) as exc:
         print("ERROR:", exc, file=sys.stderr)
         return 1
-    print("Next: open Claude Code in target project and run /sdlc <TICKET-ID> <description>")
-    print("Optional Claude hooks are NOT enabled by this installer.")
+    if args.platform in ("codex", "both"):
+        print("Codex: open target project and invoke $sdlc-orchestrate with ticket ID and requirements.")
+        print("Codex: Addy skills must be installed separately; check routing in progress.md.")
+    if args.platform in ("claude", "both"):
+        print("Claude Code: run /sdlc <TICKET-ID> <description>")
+        print("Optional Claude hooks are NOT enabled by this installer.")
     return 0
 
 if __name__ == "__main__":

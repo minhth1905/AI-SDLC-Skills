@@ -36,6 +36,26 @@ class InstallWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Already exists"):
             module.install(ROOT, self.project)
         module.install(ROOT, self.project, True)
+    def test_codex_install_is_native_and_does_not_touch_claude(self):
+        installed = module.install(ROOT, self.project, platform="codex")
+        self.assertIn(".agents/skills/sdlc-orchestrate", installed)
+        self.assertTrue((self.project / ".agents/skills/sdlc-orchestrate/SKILL.md").is_file())
+        self.assertTrue((self.project / ".agents/skills/sdlc-verify/SKILL.md").is_file())
+        self.assertTrue((self.project / ".agents/skills/sdlc-capture/SKILL.md").is_file())
+        self.assertTrue((self.project / ".agents/ai-sdlc/scripts/sdlc.py").is_file())
+        self.assertTrue((self.project / ".agents/ai-sdlc/scripts/verify_runner.py").is_file())
+        skill = (self.project / ".agents/skills/sdlc-orchestrate/SKILL.md").read_text()
+        self.assertIn(".agents/ai-sdlc/scripts/sdlc.py", skill)
+        self.assertNotIn(".claude/ai-sdlc/scripts/", skill)
+        self.assertFalse((self.project / ".claude").exists())
+        self.assertFalse((self.project / "AGENTS.md").exists())
+
+    def test_both_platforms_install(self):
+        module.install(ROOT, self.project, platform="both")
+        self.assertTrue((self.project / ".agents/skills/sdlc-orchestrate/SKILL.md").is_file())
+        self.assertTrue((self.project / ".claude/skills/sdlc-orchestrate/SKILL.md").is_file())
+        self.assertTrue((self.project / ".claude/commands/sdlc.md").is_file())
+
     def test_non_git_target_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaisesRegex(ValueError, "Git repository"):

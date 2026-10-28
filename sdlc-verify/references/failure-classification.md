@@ -1,0 +1,2 @@
+# Failure classification
+Reproduce and classify: implementation regression (fix and rerun); environment dependency (blocked, never passed); flaky (one documented retry then investigate); pre-existing baseline (compare with baseline if possible, disclose); unknown (two focused attempts then escalate). After code changes rerun affected checks; old evidence is stale. Do not hide errors by changing test assertions to match wrong behavior.

@@ -6,11 +6,12 @@ import shutil
 import subprocess
 import sys
 
-SKILLS = ("sdlc-orchestrate", "sdlc-spec", "sdlc-plan", "sdlc-build", "sdlc-verify", "sdlc-review", "sdlc-capture")
+SKILLS = ("sdlc-orchestrate", "sdlc-verify", "sdlc-capture")
+LEGACY_SKILLS = ("sdlc-spec", "sdlc-plan", "sdlc-build", "sdlc-review")
 SCRIPTS = ("sdlc.py", "context_store.py")
 HOOKS = ("guard.py", "stop.py")
 
-def install(source, target, force=False):
+def install(source, target, force=False, prune_legacy=False):
     source, target = Path(source).resolve(), Path(target).resolve()
     if not (source / ".claude/commands/sdlc.md").is_file():
         raise ValueError("Run installer from the AI-SDLC-Skills repository")
@@ -33,15 +34,25 @@ def install(source, target, force=False):
             shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
-    return [str(dst.relative_to(target)) for _, dst in paths]
+    installed = [str(dst.relative_to(target)) for _, dst in paths]
+    if prune_legacy:
+        for name in LEGACY_SKILLS:
+            legacy = target / ".claude/skills" / name
+            if legacy.is_symlink():
+                raise ValueError("Refusing to remove symlink: " + str(legacy))
+            if legacy.is_dir():
+                shutil.rmtree(legacy)
+                installed.append("Removed legacy: " + str(legacy.relative_to(target)))
+    return installed
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", default=".", help="Target Git project root")
     parser.add_argument("--force", action="store_true", help="Overwrite previously installed AI-SDLC files")
+    parser.add_argument("--prune-legacy", action="store_true", help="Explicitly delete four obsolete installed skill directories; review local changes first")
     args = parser.parse_args()
     try:
-        for path in install(Path(__file__).resolve().parents[1], args.target, args.force):
+        for path in install(Path(__file__).resolve().parents[1], args.target, args.force, args.prune_legacy):
             print("Installed:", path)
     except (ValueError, OSError) as exc:
         print("ERROR:", exc, file=sys.stderr)

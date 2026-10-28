@@ -2,7 +2,9 @@
 
 A risk-adaptive, one-command engineering workflow for Claude Code. **Addy Osmani's agent-skills** supplies optional engineering methods; this repository supplies **workflow orchestration, verifiable evidence contracts and Git-local knowledge capture**.
 
-## Three team skills\n\nThe orchestrator uses progressive-disclosure decision policies in `sdlc-orchestrate/references/` for risk classification, requirement analysis, execution, failure recovery, review triage and context management. Load them when relevant instead of expanding the root SKILL.md. These policies are copied by the existing installer.
+## Three team skills
+
+The orchestrator uses progressive-disclosure decision policies in `sdlc-orchestrate/references/` for risk classification, requirement analysis, execution, failure recovery, review triage and context management. Load them when relevant instead of expanding the root SKILL.md. These policies are copied by the existing installer.
 
 | Skill | Team responsibility |
 |---|---|

@@ -1,0 +1,2 @@
+# Rails verification
+Discover RSpec/Minitest commands from Gemfile and CI. Use request specs for HTTP behavior and DB-backed integration for booking locks, duplicate prevention and transaction boundaries; a mocked unit spec cannot prove concurrency safety. For migrations evaluate large-table lock/rollback risks without destructive production execution. For Sidekiq verify retry and idempotency as appropriate.

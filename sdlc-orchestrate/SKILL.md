@@ -11,6 +11,7 @@ Load references **at the decision point**, not all at once:
 - Classification: `references/risk-classification.md`
 - Requirement ambiguity / spec: `references/requirement-analysis.md`
 - Phase execution / agent budget: `references/execution-policy.md`
+- Before requesting any human approval: `references/approval-gate.md`
 - Test, gate or environment failure: `references/failure-recovery.md`
 - Review findings: `references/review-triage.md`
 - Compact, recovery or context budget: `references/context-management.md` and `references/resume-protocol.md`
@@ -20,7 +21,7 @@ Load references **at the decision point**, not all at once:
 **Mandatory routing:** At ticket start and before each executed phase, follow `references/community-skills.md`. Never silently bypass an installed Addy skill; if runtime availability is unknown or instructions conflict with safety gates, stop and resolve.\n\n## Lifecycle
 1. **Understand:** read CLAUDE.md/AGENTS.md, user ticket, relevant code/tests and git status. Identify analysis-only vs plan-only vs implementation. Never run beyond requested scope.
 2. **Resume/init:** `python3 .claude/ai-sdlc/scripts/sdlc.py resume ID`; if no state, classify T1/T2/T3 and `init ID --tier Tn`. Never overwrite existing task progress.
-3. **Spec/plan:** T1 brief plan; T2 spec + vertical-slice plan with **one combined human approval**; T3 explicit architecture/contract/rollback decision. Write canonical `docs/ai-sdlc/ID/` artifacts, transition `new → planned`; STOP if awaiting approval.
+3. **Spec/plan:** T1 brief plan; T2 spec + vertical-slice plan with **one human implementation approval**; T3 explicit architecture/contract/rollback decision. Write canonical `docs/ai-sdlc/ID/` artifacts, transition `new → planned`; STOP if awaiting approval. Before stopping, present a self-contained approval summary per `references/approval-gate.md`; never ask to approve an unexplained option label. External Jira creation requires separate explicit authorization.
 4. **Build:** T2/T3 require actual human approval before `approved --human-approved → building`; T1 `planned → building`. MUST load and apply mapped Addy skills when installed/readable; fallback only after verified unavailability. Record routing in progress.md. Implement/test one slice at a time and persist progress. Default **one agent**.
 5. **Verify:** `building → verifying`. Invoke `sdlc-verify`; run actual relevant checks, record `evidence.json` and `qa-report.md`, then `sdlc.py gate ID`. A gate only validates reported evidence, not independently executed commands.
 6. **Review:** `verifying → reviewing`. MUST load and apply installed Addy review skill; fallback only if unavailable; record `review.md`. Triage actionable findings, at most **two automatic fix/review cycles** total; escalate unresolved blockers.

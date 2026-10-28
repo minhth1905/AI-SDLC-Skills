@@ -4,12 +4,13 @@ Before each phase, read `community-skills.md` and confirm actual availability of
 
 ## Phase boundaries
 - T1: short plan -> build -> targeted verify -> focused review; no ceremonial spec or approval when implementation explicitly requested.
-- T2: testable spec + vertical-slice plan -> one explicit human approval -> build -> verify -> review.
+- T2: testable spec + vertical-slice plan -> one explicit human implementation approval -> build -> verify -> review.
 - T3: architecture alternatives, contract/data/security implications, rollout/rollback -> explicit human decision -> build -> verify -> review.
 - Every slice: inspect narrow code, create meaningful failing test when feasible, implement minimum behavior, run targeted check, inspect diff, persist progress.
 - One agent by default. Delegate only independent disjoint slices with explicit ownership and measurable benefit; avoid multi-agent review ping-pong.
 - Do not run entire repository tests repeatedly when targeted checks can isolate the failure; widen checks for T2/T3 before handoff.
 - Do not run uncontrolled upstream auto-commit flows. Never auto-commit/push/merge/deploy or enable hooks.
+- At T2/T3 approval checkpoints, follow `approval-gate.md`: explain the recommendation and alternatives in the message, not only in a file. Obtain separate explicit consent for external Jira mutations (creating/editing subtasks); plan approval alone never authorizes them.
 - Stop on high-impact scope drift; revise spec/plan, seek renewed approval. A changed naming choice alone does not need approval.
 
 ## Budget

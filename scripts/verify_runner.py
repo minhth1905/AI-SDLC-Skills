@@ -30,7 +30,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("task")
     parser.add_argument("--name", required=True)
-    parser.add_argument("--", dest="unused", action="store_true", help=argparse.SUPPRESS)
     args, command = parser.parse_known_args()
     if command and command[0] == "--":
         command = command[1:]

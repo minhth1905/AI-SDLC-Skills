@@ -135,3 +135,34 @@ python3 -m unittest discover -s tests -v
 - Ecomlux AI-SDLC slides shared in conversation — human accountability, artifacts, evidence and deterministic orchestration.
 
 License: no license granted unless repository owner adds a LICENSE file.
+
+## v0.4 — Git-local team context capture
+
+**Chosen storage model: A.** Each application repository owns its task memory under `docs/ai-sdlc/<task-id>/`. No external memory service. New skill: `sdlc-capture`.
+
+### Install/update
+Copy `sdlc-*` directories into the target project's `.claude/skills/`, and `scripts/` into `.claude/ai-sdlc/scripts/`. Existing v0.2 lifecycle script remains in place.
+
+### Capture after verification and review
+
+After the task reaches `ready_for_human_review`, prepare a curated, **non-sensitive** manifest (see `sdlc-capture/references/capture-manifest.json`). Then, from the target project root:
+
+```bash
+python3 .claude/ai-sdlc/scripts/context_store.py OOPS-123 --manifest /path/to/capture-manifest.json --dry-run
+python3 .claude/ai-sdlc/scripts/context_store.py OOPS-123 --manifest /path/to/capture-manifest.json
+git diff -- docs/ai-sdlc/
+```
+
+The script creates `implementation.md`, `decisions.md`, `handoff.md` and updates `docs/ai-sdlc/index.md`. **Human reviews these files with the PR.** It never commits, pushes, merges or deploys. If artifacts are new/untracked, inspect them with `git status` and `git diff --no-index /dev/null <file>` as appropriate.
+
+### Resume and retrieval
+
+Future agents start at `docs/ai-sdlc/index.md`, read relevant handoffs, then validate historical decisions against current code and Git history. Do not store entire chats or credentials.
+
+### Tests
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+See `docs/git-context-design.md` for lifecycle and limitations. The capture gate trusts agent-written evidence, so it is **not independent CI attestation**. Basic secret detection is only a guardrail, not complete data-loss prevention.

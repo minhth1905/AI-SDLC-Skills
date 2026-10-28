@@ -6,12 +6,12 @@ This repository distributes **native Codex skills** through `.agents/skills/`. T
 
 ```bash
 git clone https://github.com/minhth1905/sdlc-skills.git
-python3 sdlc-skills/scripts/install.py --target /path/to/project --platform codex
+python3 sdlc-skills/scripts/install.py --target /path/to/project  # Codex is the default
 ```
 
 For existing installations, review local changes before using `--force`. For teams running both Claude Code and Codex, choose `--platform both`.
 
-The installer creates:
+The installer defaults to Codex. To explicitly target Claude Code, use `--platform claude` (or `--platform both` for both).\n\nThe installer creates:
 - `.agents/skills/sdlc-orchestrate/SKILL.md` and its references
 - `.agents/skills/sdlc-verify/SKILL.md` and its references
 - `.agents/skills/sdlc-capture/SKILL.md` and its references

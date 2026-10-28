@@ -6,7 +6,7 @@ import re
 import sys
 
 def deny(message):
-    print(json.dumps({"decision": "block", "reason": message}))
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": message}}))
     return 0
 
 def main():

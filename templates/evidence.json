@@ -1,0 +1,9 @@
+{
+  "task_id": "example",
+  "status": "blocked",
+  "checks": [
+    {"name": "unit tests", "command": "<actual command>", "exit_code": null, "status": "not_run", "reason": "example template"}
+  ],
+  "acceptance_criteria": [],
+  "remaining_risks": []
+}

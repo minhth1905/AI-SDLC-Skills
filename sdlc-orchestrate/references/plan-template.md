@@ -14,5 +14,7 @@
 |---|---|---|---|
 | ... | ... | ... | ... |
 ## Rollback and operational considerations
+## Approval summary (self-contained: option meaning, recommendation, scope, exclusions, risks, next actions)
+## Proposed external actions (e.g. Jira subtasks: titles, scope, parent ticket; not authorized by plan approval)
 ## Blocking questions / approval decision
 ## Human approval status

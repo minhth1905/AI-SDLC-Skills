@@ -56,6 +56,16 @@ class InstallWorkflowTests(unittest.TestCase):
         self.assertTrue((self.project / ".claude/skills/sdlc-orchestrate/SKILL.md").is_file())
         self.assertTrue((self.project / ".claude/commands/sdlc.md").is_file())
 
+    def test_approval_gate_is_installed_and_requires_separate_jira_consent(self):
+        module.install(ROOT, self.project, platform="codex")
+        root = self.project / ".agents/skills/sdlc-orchestrate"
+        policy = (root / "references/approval-gate.md").read_text()
+        orchestrator = (root / "SKILL.md").read_text()
+        self.assertIn("self-contained", policy)
+        self.assertIn("separately authorized", policy)
+        self.assertIn("approval-gate.md", orchestrator)
+        self.assertIn("External Jira creation requires separate explicit authorization", orchestrator)
+
     def test_non_git_target_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaisesRegex(ValueError, "Git repository"):

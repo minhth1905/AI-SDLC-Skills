@@ -74,7 +74,7 @@ CI config: `.github/workflows/test.yml`. Run tests and validate a real Claude Co
 - The slash command is prompt-driven, **not** an independently tested skill-dispatch engine.
 - Installer does not enable hooks, install third-party plugins, or modify Claude settings.
 - Agent-written evidence and human approval flags are not tamper-proof.
-- Existing `sdlc-*/references` files may remain in the framework repository for history, but only three `SKILL.md` entrypoints are active.
+- Legacy spec/plan/review reference directories have been removed. The three reusable templates now live under `sdlc-orchestrate/references/` and are included in new installations. Risk routing remains in the orchestrator policy.
 
 ## License
 

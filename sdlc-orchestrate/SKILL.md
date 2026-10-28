@@ -13,7 +13,7 @@ Run only the scope requested: analysis, plan or implementation. Read repo CLAUDE
 - If uncertain, classify higher. Reassess on scope change and stop for reapproval.
 
 ## Community methods (do not duplicate)
-Read `references/community-skills.md`. Prefer **installed** Addy skills for spec, planning, incremental build/TDD and review. Use their methods for the relevant phase; never claim a plugin was invoked when it was not available. If missing, apply the compact built-in fallback below; disclose the fallback. Upstream mandatory gates still apply when using upstream skills. Never allow upstream automatic commits or incompatible artifact overwrites.
+Read `references/community-skills.md`. When creating canonical task artifacts, use the installed templates in `references/spec-template.md`, `references/plan-template.md` and `references/review-template.md` as lightweight starting points; adapt them to the task tier, and do not generate unnecessary sections for T1. Prefer **installed** Addy skills for spec, planning, incremental build/TDD and review. Use their methods for the relevant phase; never claim a plugin was invoked when it was not available. If missing, apply the compact built-in fallback below; disclose the fallback. Upstream mandatory gates still apply when using upstream skills. Never allow upstream automatic commits or incompatible artifact overwrites.
 
 ## Workflow
 1. **Resume or initialize:** `python3 .claude/ai-sdlc/scripts/sdlc.py resume ID`; if absent, classify and `init ID --tier Tn`. Read existing task artifacts before changing anything.

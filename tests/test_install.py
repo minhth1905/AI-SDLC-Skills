@@ -21,6 +21,9 @@ class InstallWorkflowTests(unittest.TestCase):
         self.assertTrue((self.project / ".claude/skills/sdlc-capture/SKILL.md").is_file())
         self.assertTrue((self.project / ".claude/ai-sdlc/scripts/context_store.py").is_file())
         self.assertFalse((self.project / ".claude/settings.json").exists())
+        self.assertEqual(set(module.SKILLS), {"sdlc-orchestrate", "sdlc-verify", "sdlc-capture"})
+        for name in module.LEGACY_SKILLS:
+            self.assertFalse((self.project / ".claude/skills" / name).exists())
     def test_reinstall_requires_force(self):
         module.install(ROOT, self.project)
         with self.assertRaisesRegex(ValueError, "Already exists"):
@@ -30,12 +33,24 @@ class InstallWorkflowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaisesRegex(ValueError, "Git repository"):
                 module.install(ROOT, folder)
+    def test_explicit_prune_legacy(self):
+        module.install(ROOT, self.project)
+        legacy = self.project / ".claude/skills/sdlc-plan"
+        legacy.mkdir(parents=True)
+        (legacy / "custom.md").write_text("old")
+        module.install(ROOT, self.project, force=True)
+        self.assertTrue(legacy.exists())
+        module.install(ROOT, self.project, force=True, prune_legacy=True)
+        self.assertFalse(legacy.exists())
+
     def test_installed_workflow_has_capture_and_approval(self):
         module.install(ROOT, self.project)
         command = (self.project / ".claude/commands/sdlc.md").read_text()
         self.assertIn("context_store.py", command)
         self.assertIn("--human-approved", command)
         self.assertIn("community-skills.md", command)
+        self.assertNotIn("local `sdlc-spec`", command)
+        self.assertNotIn("local `sdlc-plan`", command)
 
 if __name__ == "__main__":
     unittest.main()

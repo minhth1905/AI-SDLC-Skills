@@ -1,16 +1,48 @@
 ---
 name: sdlc-build
-description: Implement an approved SDLC plan with focused code changes and tests, without silently changing scope.
+description: Implement approved vertical slices with tests, controlled scope, progress persistence and failure recovery. Use after plan approval.
 ---
-# SDLC Build
+# SDLC Build — incremental, evidence-first implementation
 
-1. Read `docs/ai-sdlc/<task-id>/plan.md` and any `design.md` first.
-2. Require human approval for T2/T3 design decisions. T1 can follow a short plan when clear.
-3. Implement small coherent steps, reuse project patterns, add/update meaningful tests.
-4. Default to one agent. Delegate only when tasks are genuinely independent and benefits exceed overhead; never spawn review/fix agents recursively.
-5. Run targeted tests when practical; record commands and actual exit status, never fabricate results.
-6. If requirements or architecture assumptions change, stop and request decision; update plan after approval.
-7. Update `progress.md` with completed steps, remaining work, changed files and known risks. Mark `ready_for_verify` only when implementation and tests are present.
+## Preconditions
+- Read `plan.md`, `spec.md` (if any), `state.json`, repository instructions, and relevant tests.
+- For T2/T3 confirm explicit human approval. If absent, stop; never self-approve.
+- Inspect git status and avoid overwriting unrelated user edits. Never reset/clean worktree without consent.
 
-## Rules
-Do not bypass failing tests, remove assertions just to pass, leak secrets, or commit without request. Follow existing project instructions and repository conventions.
+## Execution loop (repeat for each slice)
+1. Pick first uncompleted slice, restate its acceptance IDs and affected behavior in one sentence.
+2. Inspect minimal necessary code; identify existing patterns, tests and integration contracts.
+3. Write or update a meaningful failing test when feasible. If not feasible, document reason and manual verification before coding.
+4. Implement minimal code to satisfy slice. Prefer existing patterns; avoid speculative abstractions, broad refactors and unrelated dependency upgrades.
+5. Run the narrowest relevant test/lint/typecheck; capture command, exit status and failure text.
+6. If failing: classify as **implementation**, **environment**, **flaky**, **unrelated baseline**, or **unknown**. Reproduce once before editing unrelated files. Fix root cause, not assertion.
+7. Review diff for unintended behavior, secrets, migrations, API compatibility and race conditions.
+8. Update `progress.md`: completed slice, changed files, commands/outcomes, decisions, next step. Persist before large context switches.
+9. Repeat. After all slices, hand off to verify. Do not claim final success based on targeted tests alone.
+
+## Escalation rules
+- Changed API/schema/architecture, new business behavior, irreversible migration → stop, update spec/plan, obtain human approval.
+- Unknown destructive command, production action, credential exposure → stop and ask.
+- More than two attempts on same unexplained failure → summarize evidence and request focused decision rather than blind retries.
+- Context compacted → use orchestrator resume and read persisted artifacts, not prior conversational confidence.
+
+## Examples
+**Rails booking**: when touching transaction or Redis lock, add a concurrent request/integration test and verify idempotency; do not assume a single unit test proves race safety.
+**NestJS background job**: test duplicate delivery, retry semantics and status transitions, not only happy-path DTO validation.
+
+## Subagents
+Default **one agent**. Delegate only independent tasks with disjoint files and explicit acceptance IDs; do not launch a second agent just to repeat the same review. Keep all decisions in artifacts.
+
+## Anti-patterns
+- Deleting failing tests to make CI green
+- Changing scope silently to unblock implementation
+- "All tests pass" without recorded command output
+- Recursive agent-review-agent loops
+- Committing/merging/deploying without explicit request
+
+## Completion
+- [ ] All approved slices implemented
+- [ ] New behavior has tests or explicit verification rationale
+- [ ] Progress artifact up to date
+- [ ] No known scope drift
+- [ ] Verification remains a separate gate

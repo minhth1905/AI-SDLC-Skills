@@ -166,3 +166,11 @@ python3 -m unittest discover -s tests -v
 ```
 
 See `docs/git-context-design.md` for lifecycle and limitations. The capture gate trusts agent-written evidence, so it is **not independent CI attestation**. Basic secret detection is only a guardrail, not complete data-loss prevention.
+
+## Using community engineering skills (Addy Osmani)
+
+AI-SDLC **does reuse** [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) when installed: spec-driven-development, planning-and-task-breakdown, incremental-implementation, test-driven-development and code-review-and-quality. Install it separately using upstream instructions; the AI-SDLC repo does **not** bundle or fork Addy's skills.
+
+The orchestrator checks installed skills per phase and falls back to local SDLC skills when unavailable. AI-SDLC remains responsible for risk tier, human approvals, local Git artifacts, evidence, review-loop budget and context capture. See [community-skills adapter](sdlc-orchestrate/references/community-skills.md) for routing and upstream behavior conflicts.
+
+**Status:** prompt-level skill routing only; not yet a tested automatic executable dispatch engine.

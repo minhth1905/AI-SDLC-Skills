@@ -1,0 +1,2 @@
+# Handoff quality
+Human handoff must identify task ID and review-ready status, actual implementation changed files, real test commands/results, unresolved risk, manual QA steps if applicable, followups with concrete owner or next action, and PR review decision. Do not equate ready_for_human_review with merged, deployed, released or QA accepted. Inspect generated implementation.md, decisions.md, handoff.md and index.md before sharing. Re-run dry-run after material changes to the manifest. Do not auto commit or push.

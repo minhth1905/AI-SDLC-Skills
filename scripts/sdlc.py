@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import re
 import sys
+import subprocess
+from verify_runner import fingerprint
 
 ROOT = Path.cwd()
 BASE = ROOT / "docs" / "ai-sdlc"
@@ -55,8 +57,11 @@ def evidence_gate(task):
             return False, "Evidence needs matching task_id and nonempty checks"
         if not isinstance(criteria, list) or not criteria:
             return False, "Acceptance criteria evidence is required"
+        current_fingerprint, _ = fingerprint()
         for check in checks:
             if check.get("required", True):
+                if check.get("source") != "verify_runner" or check.get("worktree_fingerprint") != current_fingerprint or check.get("worktree_changed_during_check"):
+                    return False, "Required check lacks current runner provenance: " + str(check.get("name"))
                 if check.get("status") != "passed" or check.get("exit_code") != 0 or not check.get("command"):
                     return False, "Required check missing successful command evidence: " + str(check.get("name"))
         for item in criteria:
@@ -65,7 +70,7 @@ def evidence_gate(task):
         if data.get("status") != "passed":
             return False, "Evidence status is not passed"
         return True, "Evidence gate passed"
-    except (ValueError, KeyError, TypeError) as exc:
+    except (ValueError, KeyError, TypeError, OSError, subprocess.CalledProcessError) as exc:
         return False, "Invalid evidence: " + str(exc)
 
 def cmd_init(args):

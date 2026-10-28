@@ -1,0 +1,28 @@
+name: AI-SDLC Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Validate workflow installation
+        run: |
+          mkdir -p /tmp/sdlc-example
+          git -C /tmp/sdlc-example init
+          python3 scripts/install.py --target /tmp/sdlc-example
+          test -f /tmp/sdlc-example/.claude/commands/sdlc.md
+          test -f /tmp/sdlc-example/.claude/ai-sdlc/scripts/context_store.py

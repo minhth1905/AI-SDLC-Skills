@@ -17,13 +17,13 @@ Load references **at the decision point**, not all at once:
 - Before specialist methodology: `references/community-skills.md`
 - When creating task artifacts: `references/spec-template.md`, `references/plan-template.md`, `references/review-template.md`
 
-## Lifecycle
+**Mandatory routing:** At ticket start and before each executed phase, follow `references/community-skills.md`. Never silently bypass an installed Addy skill; if runtime availability is unknown or instructions conflict with safety gates, stop and resolve.\n\n## Lifecycle
 1. **Understand:** read CLAUDE.md/AGENTS.md, user ticket, relevant code/tests and git status. Identify analysis-only vs plan-only vs implementation. Never run beyond requested scope.
 2. **Resume/init:** `python3 .claude/ai-sdlc/scripts/sdlc.py resume ID`; if no state, classify T1/T2/T3 and `init ID --tier Tn`. Never overwrite existing task progress.
 3. **Spec/plan:** T1 brief plan; T2 spec + vertical-slice plan with **one combined human approval**; T3 explicit architecture/contract/rollback decision. Write canonical `docs/ai-sdlc/ID/` artifacts, transition `new → planned`; STOP if awaiting approval.
-4. **Build:** T2/T3 require actual human approval before `approved --human-approved → building`; T1 `planned → building`. Prefer installed Addy methodology, fallback locally when unavailable. Implement/test one slice at a time and persist progress. Default **one agent**.
+4. **Build:** T2/T3 require actual human approval before `approved --human-approved → building`; T1 `planned → building`. MUST load and apply mapped Addy skills when installed/readable; fallback only after verified unavailability. Record routing in progress.md. Implement/test one slice at a time and persist progress. Default **one agent**.
 5. **Verify:** `building → verifying`. Invoke `sdlc-verify`; run actual relevant checks, record `evidence.json` and `qa-report.md`, then `sdlc.py gate ID`. A gate only validates reported evidence, not independently executed commands.
-6. **Review:** `verifying → reviewing`. Use Addy review method when installed, otherwise focused diff review; record `review.md`. Triage actionable findings, at most **two automatic fix/review cycles** total; escalate unresolved blockers.
+6. **Review:** `verifying → reviewing`. MUST load and apply installed Addy review skill; fallback only if unavailable; record `review.md`. Triage actionable findings, at most **two automatic fix/review cycles** total; escalate unresolved blockers.
 7. **Capture:** only after `reviewing → ready_for_human_review` with passing gate and review. Invoke `sdlc-capture`, dry-run and execute `context_store.py`, inspect generated docs and git diff. Never auto-commit, push, merge or deploy.
 
 ## Stop and handoff

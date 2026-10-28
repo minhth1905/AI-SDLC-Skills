@@ -1,4 +1,4 @@
-# AI-SDLC Skills Kit v0.6 — Decision-driven lean workflow
+# AI-SDLC Skills Kit v0.7 — Runner-backed verification
 
 A risk-adaptive, one-command engineering workflow for Claude Code. **Addy Osmani's agent-skills** supplies optional engineering methods; this repository supplies **workflow orchestration, verifiable evidence contracts and Git-local knowledge capture**.
 
@@ -9,7 +9,7 @@ The orchestrator uses progressive-disclosure decision policies in `sdlc-orchestr
 | Skill | Team responsibility |
 |---|---|
 | `sdlc-orchestrate` | Risk tiers, approvals, spec/plan/build/review fallback, state and resume |
-| `sdlc-verify` | Real checks, acceptance evidence and QA gate |
+| `sdlc-verify` | Risk-based checks, runner provenance, freshness and QA gate |
 | `sdlc-capture` | Curated implementation, decisions and handoff in target project's Git |
 
 Community methods (when installed): `spec-driven-development`, `planning-and-task-breakdown`, `incremental-implementation`, `test-driven-development`, `code-review-and-quality`. See [routing policy](sdlc-orchestrate/references/community-skills.md). Without the Addy plugin, the orchestrator uses compact fallback instructions; it does not pretend the community skill ran.
@@ -59,7 +59,7 @@ After compaction: `/sdlc OOPS-123 Resume`. The agent reads `docs/ai-sdlc/OOPS-12
 - **T2:** bounded feature; spec and plan, one combined approval; integration tests where applicable.
 - **T3:** payment, security, concurrency, migrations or cross-service design; explicit architecture approval, regression/rollback/security review.
 
-The lifecycle is tracked by `scripts/sdlc.py`. Evidence must include actual commands, exit codes and acceptance outcomes; `sdlc.py gate` validates declared fields, **not** independent test execution. After review, `context_store.py` saves `implementation.md`, `decisions.md`, `handoff.md` and `docs/ai-sdlc/index.md` in the target Git project.
+Required test commands run via `scripts/verify_runner.py` (installed in `.claude/ai-sdlc/scripts/`), which records exit codes and a Git working-tree fingerprint. The gate rejects stale or manually authored required check entries; acceptance mapping remains agent-authored and is not tamper-proof.\n\nThe lifecycle is tracked by `scripts/sdlc.py`. Evidence must include actual commands, exit codes and acceptance outcomes; `sdlc.py gate` validates declared fields, **not** independent test execution. After review, `context_store.py` saves `implementation.md`, `decisions.md`, `handoff.md` and `docs/ai-sdlc/index.md` in the target Git project.
 
 ## Test
 

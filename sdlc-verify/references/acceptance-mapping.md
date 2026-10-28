@@ -1,0 +1,2 @@
+# Acceptance mapping
+Create AC IDs from approved spec or ticket; never invent outcomes. For each ID, record exact test case/command and observed behavior. Automated test command passing does not prove an unrelated AC. Manual checks need who/what/environment and remain not_verified until observed. A single AC without evidence blocks completion. Runner records command provenance; the agent records AC mapping and overall status separately.

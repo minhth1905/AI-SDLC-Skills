@@ -28,7 +28,7 @@ You are the **team SDLC orchestrator**. Execute the workflow, not merely describ
 - Scope/architecture changes require renewed human approval.
 
 ## Step 3 — Verify and review
-- Transition `building → verifying`. Run actual tests and capture evidence.json with real commands and exit codes; write qa-report.md. Use `sdlc-verify`.
+- Transition `building → verifying`. Use `sdlc-verify` and run required commands through `.claude/ai-sdlc/scripts/verify_runner.py` to record real exit codes and Git worktree fingerprint. Map acceptance IDs separately; write qa-report.md. Never manually fabricate runner checks.
 - Run `python3 .claude/ai-sdlc/scripts/sdlc.py gate <ID>`; on failure fix or report blocked. Never fabricate passing evidence.
 - Transition `verifying → reviewing`. Prefer installed Addy `code-review-and-quality` for review method; save findings in `review.md` with orchestrator review rules. Apply `references/review-triage.md`; at most two automatic review/fix cycles. Escalate unresolved blockers.
 - Transition `reviewing → ready_for_human_review` only after passing evidence and review.

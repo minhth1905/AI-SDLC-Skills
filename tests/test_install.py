@@ -22,6 +22,9 @@ class InstallWorkflowTests(unittest.TestCase):
         for name in ("spec-template.md", "plan-template.md", "review-template.md", "risk-classification.md", "requirement-analysis.md", "execution-policy.md", "failure-recovery.md", "review-triage.md", "context-management.md"):
             self.assertTrue((self.project / ".claude/skills/sdlc-orchestrate/references" / name).is_file())
         self.assertTrue((self.project / ".claude/ai-sdlc/scripts/context_store.py").is_file())
+        self.assertTrue((self.project / ".claude/ai-sdlc/scripts/verify_runner.py").is_file())
+        for name in ("test-selection.md", "acceptance-mapping.md", "failure-classification.md", "evidence-policy.md", "regression-strategy.md", "rails-verification.md", "nestjs-verification.md"):
+            self.assertTrue((self.project / ".claude/skills/sdlc-verify/references" / name).is_file())
         self.assertFalse((self.project / ".claude/settings.json").exists())
         self.assertEqual(set(module.SKILLS), {"sdlc-orchestrate", "sdlc-verify", "sdlc-capture"})
         for name in module.LEGACY_SKILLS:

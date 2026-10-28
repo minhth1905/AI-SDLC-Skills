@@ -13,6 +13,8 @@ class LifecycleTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.cwd = self.tmp.name
+        subprocess.run(["git", "init", "-q"], cwd=self.cwd, check=True)
+        subprocess.run(["git", "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-q", "--allow-empty", "-m", "initial"], cwd=self.cwd, check=True)
 
     def call(self, *args):
         return subprocess.run([sys.executable, str(SCRIPT), *args], cwd=self.cwd, capture_output=True, text=True)
@@ -34,7 +36,7 @@ class LifecycleTests(unittest.TestCase):
             "checks": [{"name": "tests", "command": "pytest", "status": "passed", "exit_code": 0}],
             "acceptance_criteria": [{"name": "works", "status": "passed", "evidence": "test output"}]
         }))
-        self.assertEqual(self.call("gate", "ABC-2").returncode, 0)
+        self.assertNotEqual(self.call("gate", "ABC-2").returncode, 0)  # Agent-authored evidence is insufficient
 
     def test_invalid_task_id(self):
         self.assertNotEqual(self.call("init", "../escape", "--tier", "T1").returncode, 0)

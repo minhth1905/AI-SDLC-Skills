@@ -1,0 +1,2 @@
+# Test selection
+Start from changed behavior and acceptance IDs, not a fixed command list. Discover project test commands from CI and repository scripts. T1: targeted tests. T2: targeted plus affected integration/contract checks. T3: risk-specific concurrency, auth, migration/rollback, broader regression and security where applicable. Record intentionally omitted checks and why; do not label skipped required tests as passed. Avoid expensive full suites until targeted checks are stable.

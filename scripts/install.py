@@ -8,7 +8,7 @@ import sys
 
 SKILLS = ("sdlc-orchestrate", "sdlc-verify", "sdlc-capture")
 LEGACY_SKILLS = ("sdlc-spec", "sdlc-plan", "sdlc-build", "sdlc-review")
-SCRIPTS = ("sdlc.py", "context_store.py")
+SCRIPTS = ("sdlc.py", "context_store.py", "verify_runner.py")
 HOOKS = ("guard.py", "stop.py")
 
 def install(source, target, force=False, prune_legacy=False):

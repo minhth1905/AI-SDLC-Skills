@@ -19,6 +19,8 @@ class InstallWorkflowTests(unittest.TestCase):
         installed = module.install(ROOT, self.project)
         self.assertIn(".claude/commands/sdlc.md", installed)
         self.assertTrue((self.project / ".claude/skills/sdlc-capture/SKILL.md").is_file())
+        for name in ("spec-template.md", "plan-template.md", "review-template.md"):
+            self.assertTrue((self.project / ".claude/skills/sdlc-orchestrate/references" / name).is_file())
         self.assertTrue((self.project / ".claude/ai-sdlc/scripts/context_store.py").is_file())
         self.assertFalse((self.project / ".claude/settings.json").exists())
         self.assertEqual(set(module.SKILLS), {"sdlc-orchestrate", "sdlc-verify", "sdlc-capture"})

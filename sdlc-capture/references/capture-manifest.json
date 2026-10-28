@@ -1,0 +1,10 @@
+{
+  "task_id": "EXAMPLE-123",
+  "title": "Short, non-sensitive feature title",
+  "summary": "What was actually implemented; no speculative claims.",
+  "rationale": "Why this solution was chosen.",
+  "changed_files": ["app/services/example.rb"],
+  "decisions": ["Use existing service pattern instead of adding another abstraction."],
+  "remaining_risks": ["Manual QA remains pending."],
+  "followups": ["Human reviews PR and approves merge."]
+}

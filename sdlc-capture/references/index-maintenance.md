@@ -1,0 +1,2 @@
+# Index maintenance
+`docs/ai-sdlc/index.md` is a compact table of contents, not a vector store. Keep exactly one entry per task ID; update the task's entry on recapture. Preserve unrelated entries. Do not include secrets or internal URLs. If a task is superseded, document the successor in handoff instead of deleting history. Avoid automatic edits to global project conventions. Inspect diff and rollback local doc changes manually when required.

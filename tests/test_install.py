@@ -56,6 +56,10 @@ class InstallWorkflowTests(unittest.TestCase):
         self.assertIn("context_store.py", command)
         self.assertIn("--human-approved", command)
         self.assertIn("community-skills.md", command)
+        self.assertIn("MUST load and apply", command)
+        routing = (self.project / ".claude/skills/sdlc-orchestrate/references/community-skills.md").read_text()
+        self.assertIn("MUST load and apply", routing)
+        self.assertIn("Fallback is allowed only", routing)
         self.assertNotIn("local `sdlc-spec`", command)
         self.assertNotIn("local `sdlc-plan`", command)
 

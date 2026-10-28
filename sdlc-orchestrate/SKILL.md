@@ -1,23 +1,58 @@
 ---
 name: sdlc-orchestrate
-description: Coordinate plan, build, verify and review with risk-based human gates, persistent artifacts and v0.2 local lifecycle commands.
+description: Route T1/T2/T3 work through spec, plan, build, verify and review with minimal human interruptions, persistent state and safe resume.
 ---
-# SDLC Orchestrate (v0.2)
+# SDLC Orchestrate — human-centered engineering workflow
 
-## Start or resume
-- Find the task's `docs/ai-sdlc/<task-id>/state.json`. If missing, run `python3 .claude/ai-sdlc/scripts/sdlc.py init <task-id> --tier T1|T2|T3` after classifying risk.
-- For an existing task, run `python3 .claude/ai-sdlc/scripts/sdlc.py resume <task-id>` and read plan, progress, evidence and review artifacts before taking action. **Never restart brainstorming merely because context compacted.**
-- Keep `.ai-sdlc-active` set to the task ID only if optional Claude hooks were installed and explicitly enabled.
+## Purpose
+Provide a predictable end-to-end engineering workflow without forcing heavy ceremony on simple fixes. **AI proposes and executes; humans own intent, high-impact decisions and merge.** This skill routes to specialized skills; do not reproduce their entire instructions in context.
 
-## Phases
-`new → planned → approved (T2/T3) → building → verifying → reviewing → ready_for_human_review`; failures go to `blocked` or a recorded correction phase.
-- After plan, use `sdlc.py transition <task-id> planned`.
-- T2/T3: stop for human approval of the proposed approach. After the human actually approves, use `transition <task-id> approved --human-approved`. Never auto-approve.
-- Use `sdlc-build`; transition to `building` and then `verifying`.
-- Use `sdlc-verify`, record real evidence, and run `sdlc.py gate <task-id>` before review. Then transition to `reviewing`.
-- Use `sdlc-review`, ensure `review.md` exists; transition to `ready_for_human_review` only if evidence gate passes.
-- Max two automatic review/fix cycles; unresolved findings or exhausted budget require human intervention.
-- Do not merge or deploy without explicit human approval.
+## On invocation
+1. Determine if user asked for **analysis only**, **plan only**, or **implementation**. Never silently execute beyond requested scope.
+2. Read repo instructions, git status and relevant ticket/source. If task already exists, call `python3 .claude/ai-sdlc/scripts/sdlc.py resume <task-id>` and read persisted artifacts. Do not restart from scratch after compact.
+3. Choose T1/T2/T3 via `sdlc-plan/references/risk-routing.md`. Escalate for security, payment, large migrations, concurrency and cross-service changes.
+4. Initialize state only when not already present; persist task ID and tier. Optional hooks activate only when user intentionally creates `.ai-sdlc-active`.
 
-## Rules
-Prefer one agent; ask only blocking questions; document assumptions. Never fabricate tests, claim security enforcement, or silently change scope. Use code for lifecycle and AI for reasoning. The CLI is a local convention and can be modified by the agent, not a security boundary.
+## Routing table
+| Tier | Flow | Human gate |
+|---|---|---|
+| T1 | short plan → build → targeted verify → lightweight review | only if blocked or changed scope |
+| T2 | spec + plan → build → verify → review | **one combined** approval |
+| T3 | capability map (if needed) → spec → design/plan → build → verify → review | module boundary/architecture approval |
+
+## Lifecycle
+`new → planned → approved (T2/T3) → building → verifying → reviewing → ready_for_human_review`.
+Use `scripts/sdlc.py` for state changes when installed. Do not fake transitions or write approved=true without an actual human message.
+
+## Phase handoffs
+- **Spec** (`sdlc-spec`): clarify behavior, edge cases and acceptance IDs. Stop at human gate when required.
+- **Plan** (`sdlc-plan`): map criteria to vertical slices and tests. T2 combine spec/plan checkpoint.
+- **Build** (`sdlc-build`): one agent by default; persist progress after slices.
+- **Verify** (`sdlc-verify`): run real checks and save evidence; gate before review completion.
+- **Review** (`sdlc-review`): evidence-based findings; at most two automatic fix cycles.
+- **Handoff**: summarize changed files, tests, risks, open findings, and human merge/release action.
+
+## Minimal interaction protocol
+- Ask **only blocking** questions; batch up to three. Nonblocking choices become explicit assumptions.
+- Do not ask for approval twice when the same T2 spec/plan can be reviewed together.
+- For T3, do not compress material architecture decisions into assumptions.
+- Do not spawn parallel subagents unless clearly independent and cost-effective.
+
+## Compact/recovery protocol
+Read in order: state.json → spec.md → plan.md → progress.md → evidence.json → review.md (existing files only). Determine last verified slice and next safe action. Summarize missing information; never claim prior checks passed solely from conversation memory. See `references/resume-protocol.md`.
+
+## Stop conditions
+- Planning-only request completed
+- Human approval required
+- Unresolved high-impact ambiguity or scope change
+- Dangerous command/production access needs authorization
+- Verification blocked or evidence gate failed
+- Two automatic review/fix loops exhausted
+- Ready for human review (never auto-merge)
+
+## Handoff checklist
+- [ ] Correct tier and source-of-truth artifacts
+- [ ] Scope unchanged or re-approved
+- [ ] Evidence tied to acceptance IDs
+- [ ] Review findings triaged
+- [ ] Remaining human action explicit

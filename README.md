@@ -1,22 +1,37 @@
-# AI-SDLC Skills Kit v0.2
+# AI-SDLC Skills Kit v0.3
 
-A lightweight **human-centered AI software development lifecycle** for Claude Code, with skills also usable in Codex.
+A **human-centered, risk-adaptive engineering workflow** for Claude Code and Codex: **Spec → Plan → Build → Verify → Review → Human ship**.
 
-**Plan → Build → Verify → Review → Human merge.** Designed to avoid excessive brainstorming, unnecessary subagents, unbounded review/fix loops and unverifiable "done" claims.
+Built to keep the useful discipline of spec-driven engineering without the slow subagent/approval loops that make small coding tasks expensive.
 
-## What's new in v0.2
+## Why v0.3?
 
-- **Deterministic state transitions** via Python standard-library script (`scripts/sdlc.py`).
-- **Evidence gate** requiring actual checks and acceptance-criterion evidence.
-- **Resume after compact**: persisted `state.json` and task artifacts; `resume` prints context.
-- **Opt-in Claude Code hooks**: deny some unsafe commands/secret file access and check evidence before stopping from ready-for-review phase.
-- **Unit tests** for approval, evidence and invalid task IDs.
+v0.1/v0.2 established the workflow skeleton, state machine and optional Claude hooks. v0.3 adds **deep operational skills** with decision rules, examples, templates, anti-patterns, stop conditions and checklists. The Python scripts/hooks remain from v0.2; this release primarily improves agent instructions and handoffs.
 
-> Hooks are **defense in depth**, not a security sandbox. Command string filters can be bypassed; use Claude Code tool permissions, secret management, CI and least privilege. The state file and evidence are written by the agent and are not independently attested. A CLI flag is not proof of human approval.
+### Skills
 
-## Install Claude Code (project-local)
+| Skill | Purpose | Detailed references |
+|---|---|---|
+| `sdlc-orchestrate` | Tier routing, checkpoints, recovery | resume protocol |
+| `sdlc-spec` **NEW** | Requirement analysis, scope, acceptance criteria | spec template |
+| `sdlc-plan` | Architecture trade-offs, risk routing, vertical slices | risk routing, plan template |
+| `sdlc-build` | Incremental implementation, testing, progress | progress template |
+| `sdlc-verify` | Real checks, traceable evidence, QA | evidence example |
+| `sdlc-review` | Finding triage, bounded fix cycles, human handoff | review template |
 
-Clone this repo and run from the **target project root**:
+## Workflow by tier
+
+| Tier | Typical tasks | Flow | Human checkpoints |
+|---|---|---|---|
+| **T1** | localized low-risk fix | short plan → build → targeted verify → review | only blockers |
+| **T2** | bounded feature or behavior change | spec + plan → build → verify → review | **one combined** spec/plan approval |
+| **T3** | architecture, money, security, concurrency, migration | capability map (if needed) → spec → design/plan → build → verify → review | explicit design/architecture decisions |
+
+**T3 must not be auto-downgraded** to avoid asking necessary questions. Human owns final PR merge and release.
+
+## Install (Claude Code)
+
+From your **target project root**:
 
 ```bash
 git clone https://github.com/minhth1905/AI-SDLC-Skills.git /tmp/AI-SDLC-Skills
@@ -25,57 +40,98 @@ cp -R /tmp/AI-SDLC-Skills/sdlc-* .claude/skills/
 cp -R /tmp/AI-SDLC-Skills/scripts /tmp/AI-SDLC-Skills/hooks .claude/ai-sdlc/
 ```
 
-Merge the contents of `examples/claude-settings.json` into `.claude/settings.json` (do **not** overwrite your existing settings). This hook example assumes the scripts live under `.claude/ai-sdlc/`. Test hooks in a disposable repository first.
+Merge `examples/claude-settings.json` into `.claude/settings.json` if you want **optional** hooks. Do not overwrite existing settings. The example assumes scripts are at `.claude/ai-sdlc/`. Review and test hook scripts before enabling them; they execute with your user permissions. Claude Code hook documentation: https://code.claude.com/docs/en/hooks
 
-**Activate hooks for one task only**:
+### Start a task
+
+```text
+Use sdlc-orchestrate for this ticket: <ticket text or URL>.
+Classify T1/T2/T3, ask only blocking questions, and follow risk-based approvals.
+For T2, combine spec and plan approval into one checkpoint.
+Do not merge or deploy.
+```
+
+For planning only:
+
+```text
+Use sdlc-spec and sdlc-plan to analyze this feature.
+Save artifacts and stop before implementation.
+```
+
+### Local lifecycle (optional)
 
 ```bash
 python3 .claude/ai-sdlc/scripts/sdlc.py init OOPS-123 --tier T2
 printf 'OOPS-123\n' > .ai-sdlc-active
 python3 .claude/ai-sdlc/scripts/sdlc.py transition OOPS-123 planned
-```
-
-Then ask Claude Code: `Use sdlc-plan for OOPS-123. Do not implement until I approve the plan.`
-
-After *you* approve a T2/T3 plan, record approval:
-
-```bash
+# After a human has actually approved the plan:
 python3 .claude/ai-sdlc/scripts/sdlc.py transition OOPS-123 approved --human-approved
 python3 .claude/ai-sdlc/scripts/sdlc.py transition OOPS-123 building
 ```
 
-Proceed with `sdlc-build`, `sdlc-verify`, `sdlc-review`. The agent must write real command results into `docs/ai-sdlc/OOPS-123/evidence.json`, including `checks` with `status: passed`, `exit_code: 0`, `command`, and `acceptance_criteria` with `status: passed` and evidence. Use:
+The approval flag is a local convention, **not authenticated proof of human approval**. Always verify approval in the conversation.
+
+### Resume after context compaction
+
+```text
+Use sdlc-orchestrate to resume OOPS-123.
+Read state.json, spec.md, plan.md, progress.md and evidence.json.
+Inspect current git diff before continuing; do not restart brainstorming.
+```
+
+Or inspect state:
 
 ```bash
-python3 .claude/ai-sdlc/scripts/sdlc.py gate OOPS-123
 python3 .claude/ai-sdlc/scripts/sdlc.py resume OOPS-123
 ```
 
-Once human review is complete, deactivate hooks for this task: `rm .ai-sdlc-active`.
+### Evidence gate
 
-## Resume after compaction
-
-```text
-Use sdlc-orchestrate to resume OOPS-123. First run the sdlc.py resume command, read plan.md, progress.md, state.json and evidence.json. Do not restart brainstorming or assume tests passed.
+```bash
+python3 .claude/ai-sdlc/scripts/sdlc.py gate OOPS-123
 ```
 
-## Tiers
+It checks JSON fields and declared passing outcomes; it does **not** independently attest that commands were executed. The agent must run tests and capture actual outcomes. For independent verification, rely on CI and human review.
 
-- T1 small fix: short plan, targeted checks.
-- T2 feature: plan, explicit human approval, verification.
-- T3 complex/high-risk: design, approval, broad verification, QA and security review.
+## Artifacts (inside target project)
 
-## Repository structure
+```text
+docs/ai-sdlc/OOPS-123/
+  state.json
+  spec.md         # T2/T3
+  design.md       # T3 when needed
+  plan.md
+  progress.md
+  evidence.json
+  qa-report.md
+  review.md
+```
 
-- `sdlc-*/SKILL.md`: five skills
-- `scripts/sdlc.py`: lifecycle / evidence / resume
-- `hooks/`: optional Claude Code hook commands
-- `examples/claude-settings.json`: hook configuration snippet
-- `templates/`: plan, state and evidence examples
-- `tests/`: stdlib unittest suite
+Use existing project spec tooling (such as OpenSpec) when already adopted rather than creating duplicate sources of truth.
 
-Run tests: `python3 -m unittest discover -s tests -v`.
+## Codex
 
-## Limitations
+The `sdlc-*/SKILL.md` skills can be copied into your Codex skills directory (e.g. `.agents/skills/`). The included Claude Code hooks are **not** portable to Codex without adapting the event schemas.
 
-This is a **v0.2 prototype**, not a certified secure or fully automatic workflow. Approval is a convention, not authenticated authorization. The evidence gate checks JSON structure and claimed outcomes, not the provenance of test execution. The Stop hook only checks evidence when phase is `ready_for_human_review`; it does not prevent a misleading response in other phases. The command guard uses heuristics and does not comprehensively prevent exfiltration or dangerous commands. Codex can use the skills but the Claude Code hooks are not portable as-is. Human review and merge remain mandatory.
+## Test
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+## Important limitations
+
+- v0.3 is a workflow/playbook release, not a hardened automation platform.
+- Hook command filters are heuristic and can be bypassed; they are not a sandbox.
+- Agent-written evidence is not cryptographically trustworthy.
+- The Stop hook only checks evidence at the `ready_for_human_review` phase.
+- Do not run hooks from untrusted repositories without reviewing them.
+- No automatic commit, merge, production deployment or irreversible migration.
+- Compatibility with specific Claude Code/Codex versions and real Rails/NestJS repositories must be tested locally.
+
+## Inspiration
+
+- [Addy Osmani's agent-skills / spec-driven-development](https://github.com/addyosmani/agent-skills/blob/main/skills/spec-driven-development/SKILL.md) — reference for detailed skill design and explicit gates, not copied verbatim.
+- Ecomlux AI-SDLC slides shared in conversation — human accountability, artifacts, evidence and deterministic orchestration.
+
+License: no license granted unless repository owner adds a LICENSE file.

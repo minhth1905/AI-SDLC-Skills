@@ -1,21 +1,23 @@
 ---
 name: sdlc-orchestrate
-description: Coordinate plan, build, verify and review for an engineering task using risk-based checkpoints and persistent artifacts.
+description: Coordinate plan, build, verify and review with risk-based human gates, persistent artifacts and v0.2 local lifecycle commands.
 ---
-# SDLC Orchestrate
+# SDLC Orchestrate (v0.2)
 
-## Lifecycle
-`new -> planned -> approved (T2/T3) -> building -> verifying -> reviewing -> ready_for_human_review`.
-Failures go to `blocked` or back to `building` with recorded evidence. Never skip human gates.
+## Start or resume
+- Find the task's `docs/ai-sdlc/<task-id>/state.json`. If missing, run `python3 .claude/ai-sdlc/scripts/sdlc.py init <task-id> --tier T1|T2|T3` after classifying risk.
+- For an existing task, run `python3 .claude/ai-sdlc/scripts/sdlc.py resume <task-id>` and read plan, progress, evidence and review artifacts before taking action. **Never restart brainstorming merely because context compacted.**
+- Keep `.ai-sdlc-active` set to the task ID only if optional Claude hooks were installed and explicitly enabled.
 
-## Procedure
-1. Assign task ID from user/ticket or safe short slug; create `docs/ai-sdlc/<task-id>/`.
-2. Invoke `sdlc-plan`; classify T1/T2/T3.
-3. For T2/T3, present proposed design and wait for explicit approval before implementation. T1 may proceed if user asked to implement and ambiguity is low.
-4. Invoke `sdlc-build`, `sdlc-verify`, `sdlc-review` sequentially. Do not run the entire chain when user requested planning only.
-5. Keep `state.json` with phase, tier, plan approval, blockers and evidence paths; update after each phase.
-6. On verification failure, allow a focused fix and re-verify. Max two automatic review/fix cycles; unresolved issues require human decision.
-7. Finish with concise summary: changes, tests run and actual outcomes, remaining risks, artifact paths, and human actions required.
+## Phases
+`new → planned → approved (T2/T3) → building → verifying → reviewing → ready_for_human_review`; failures go to `blocked` or a recorded correction phase.
+- After plan, use `sdlc.py transition <task-id> planned`.
+- T2/T3: stop for human approval of the proposed approach. After the human actually approves, use `transition <task-id> approved --human-approved`. Never auto-approve.
+- Use `sdlc-build`; transition to `building` and then `verifying`.
+- Use `sdlc-verify`, record real evidence, and run `sdlc.py gate <task-id>` before review. Then transition to `reviewing`.
+- Use `sdlc-review`, ensure `review.md` exists; transition to `ready_for_human_review` only if evidence gate passes.
+- Max two automatic review/fix cycles; unresolved findings or exhausted budget require human intervention.
+- Do not merge or deploy without explicit human approval.
 
-## Hard constraints
-Human owns requirement interpretation, architecture trade-offs, final QA acceptance and merge. Never read/print secrets intentionally. Hooks/security policy are separate enforcement mechanisms; instructions alone do not enforce them. No claim of deterministic enforcement until implemented.
+## Rules
+Prefer one agent; ask only blocking questions; document assumptions. Never fabricate tests, claim security enforcement, or silently change scope. Use code for lifecycle and AI for reasoning. The CLI is a local convention and can be modified by the agent, not a security boundary.

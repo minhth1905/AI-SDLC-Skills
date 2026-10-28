@@ -19,6 +19,8 @@ class InstallWorkflowTests(unittest.TestCase):
         installed = module.install(ROOT, self.project)
         self.assertIn(".claude/commands/sdlc.md", installed)
         self.assertTrue((self.project / ".claude/skills/sdlc-capture/SKILL.md").is_file())
+        for name in ("source-traceability.md", "knowledge-selection.md", "privacy-and-sanitization.md", "handoff-quality.md", "index-maintenance.md"):
+            self.assertTrue((self.project / ".claude/skills/sdlc-capture/references" / name).is_file())
         for name in ("spec-template.md", "plan-template.md", "review-template.md", "risk-classification.md", "requirement-analysis.md", "execution-policy.md", "failure-recovery.md", "review-triage.md", "context-management.md"):
             self.assertTrue((self.project / ".claude/skills/sdlc-orchestrate/references" / name).is_file())
         self.assertTrue((self.project / ".claude/ai-sdlc/scripts/context_store.py").is_file())

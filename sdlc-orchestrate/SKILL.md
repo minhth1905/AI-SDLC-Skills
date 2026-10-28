@@ -24,7 +24,7 @@ Provide a predictable end-to-end engineering workflow without forcing heavy cere
 `new → planned → approved (T2/T3) → building → verifying → reviewing → ready_for_human_review`.
 Use `scripts/sdlc.py` for state changes when installed. Do not fake transitions or write approved=true without an actual human message.
 
-## Phase handoffs
+## Community skill routing\nBefore executing spec/plan/build/test/review, consult `references/community-skills.md`. Prefer the installed Addy Osmani engineering skill for specialist methodology when available, and retain team-owned state, gates, evidence and capture. Never claim a community skill was invoked if not installed. In case of incompatible upstream gates or commit behavior, obey the stronger safety gate or use the team fallback.\n\n## Phase handoffs
 - **Spec** (`sdlc-spec`): clarify behavior, edge cases and acceptance IDs. Stop at human gate when required.
 - **Plan** (`sdlc-plan`): map criteria to vertical slices and tests. T2 combine spec/plan checkpoint.
 - **Build** (`sdlc-build`): one agent by default; persist progress after slices.

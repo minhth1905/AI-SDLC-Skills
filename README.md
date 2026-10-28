@@ -174,3 +174,44 @@ AI-SDLC **does reuse** [addyosmani/agent-skills](https://github.com/addyosmani/a
 The orchestrator checks installed skills per phase and falls back to local SDLC skills when unavailable. AI-SDLC remains responsible for risk tier, human approvals, local Git artifacts, evidence, review-loop budget and context capture. See [community-skills adapter](sdlc-orchestrate/references/community-skills.md) for routing and upstream behavior conflicts.
 
 **Status:** prompt-level skill routing only; not yet a tested automatic executable dispatch engine.
+
+## One-command Claude Code workflow
+
+Install the workflow from this repository into **each target project**:
+
+```bash
+python3 scripts/install.py --target /path/to/your-project
+```
+
+The installer copies the `/sdlc` slash command, seven team skills, local lifecycle and context-capture scripts, and optional hook files into `.claude/`. It does **not** enable hooks, install third-party plugins, modify existing Claude settings, or auto-commit. Existing files are protected unless `--force` is provided; review changes before using force.
+
+In Claude Code, independently install Addy Osmani's agent-skills plugin if you want its specialist methodologies:
+
+```text
+/plugin marketplace add addyosmani/agent-skills
+/plugin install agent-skills@addy-agent-skills
+```
+
+From the **target project root**, invoke:
+
+```text
+/sdlc OOPS-123 Fix booking concurrency and add regression tests
+```
+
+For T2/T3, the command stops after the plan for human approval. Continue the same task with:
+
+```text
+/sdlc OOPS-123 Approved. Continue the implementation according to the plan.
+```
+
+For resumption after compaction, rerun `/sdlc OOPS-123 Resume`. It reads the Git-local state and continues from the current phase rather than restarting. On completion it runs the capture script to write `implementation.md`, `decisions.md`, `handoff.md` and the project task index.
+
+### Workflow contract and limitations
+
+- The slash command is a **Claude Code prompt-based orchestrator**, not a standalone autonomous execution engine.
+- The team owns risk tiers, approval, state, evidence and capture. Upstream Addy skills supply methods only when installed and available.
+- An agent can call `sdlc.py` for phase transitions, but the CLI does not cryptographically authenticate human approval.
+- Context capture requires a curated manifest and actual verification/review artifacts.
+- No auto-commit, push, merge, deploy or enabling hooks.
+- No Jira integration is bundled: supply ticket text or a URL Claude can access with its available tools.
+- CI integration, end-to-end workflow execution and exact third-party skill invocation still need validation in a real Claude Code session.

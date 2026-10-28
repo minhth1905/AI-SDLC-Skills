@@ -6,12 +6,12 @@ argument-hint: <TICKET-ID> <ticket text or URL>
 
 Input: $ARGUMENTS
 
-You are the **team SDLC orchestrator**. Execute the workflow, not merely describe it. Read `.claude/skills/sdlc-orchestrate/SKILL.md` and `.claude/skills/sdlc-orchestrate/references/community-skills.md` first. Follow repository `CLAUDE.md` and `AGENTS.md`. The user's request sets scope; never implement if they only asked for a plan.
+You are the **team SDLC orchestrator**. Execute the workflow, not merely describe it. Read `.claude/skills/sdlc-orchestrate/SKILL.md` first, then load only the referenced decision policy for the current phase. Read `references/community-skills.md` when selecting a specialist method. Follow repository `CLAUDE.md` and `AGENTS.md`. The user's request sets scope; never implement if they only asked for a plan.
 
 ## Step 0 — Identify and resume
 - Parse the ticket ID from first argument. If no valid ID, ask for one; never invent it.
 - Read ticket body from supplied text or accessible linked source; if unavailable, request the missing requirements.
-- From the target project root, run `python3 .claude/ai-sdlc/scripts/sdlc.py resume <ID>`. If no state exists, inspect relevant code and prior `docs/ai-sdlc/index.md` handoffs, classify T1/T2/T3 using the orchestrator risk policy, then run `python3 .claude/ai-sdlc/scripts/sdlc.py init <ID> --tier T1|T2|T3`.
+- From the target project root, run `python3 .claude/ai-sdlc/scripts/sdlc.py resume <ID>`. If no state exists, inspect relevant code and prior `docs/ai-sdlc/index.md` handoffs, classify T1/T2/T3 using `references/risk-classification.md`, then run `python3 .claude/ai-sdlc/scripts/sdlc.py init <ID> --tier T1|T2|T3`.
 - If an existing state exists, resume it; do not reinitialize or repeat completed steps. Confirm current git diff and relevant artifacts.
 
 ## Step 1 — Spec and plan
@@ -30,7 +30,7 @@ You are the **team SDLC orchestrator**. Execute the workflow, not merely describ
 ## Step 3 — Verify and review
 - Transition `building → verifying`. Run actual tests and capture evidence.json with real commands and exit codes; write qa-report.md. Use `sdlc-verify`.
 - Run `python3 .claude/ai-sdlc/scripts/sdlc.py gate <ID>`; on failure fix or report blocked. Never fabricate passing evidence.
-- Transition `verifying → reviewing`. Prefer installed Addy `code-review-and-quality` for review method; save findings in `review.md` with orchestrator review rules. At most two automatic review/fix cycles. Escalate unresolved blockers.
+- Transition `verifying → reviewing`. Prefer installed Addy `code-review-and-quality` for review method; save findings in `review.md` with orchestrator review rules. Apply `references/review-triage.md`; at most two automatic review/fix cycles. Escalate unresolved blockers.
 - Transition `reviewing → ready_for_human_review` only after passing evidence and review.
 
 ## Step 4 — Capture (required for completed implementation)

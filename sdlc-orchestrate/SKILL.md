@@ -1,31 +1,30 @@
 ---
 name: sdlc-orchestrate
-description: Run risk-adaptive ticket-to-PR workflow with Addy community methods and team-owned state, approvals, evidence, and Git context.
+description: Risk-adaptive Jira-ticket-to-PR workflow with decision policies, human gates, evidence, resume and Git-local context.
 ---
-# AI-SDLC Orchestrate (v0.5)
+# AI-SDLC Orchestrate v0.6
 
-Run only the scope requested: analysis, plan or implementation. Read repo CLAUDE.md/AGENTS.md, git status, ticket, existing code and docs/ai-sdlc/index.md. Do not auto-commit, push, merge, deploy, run destructive migrations or disclose secrets.
+**Purpose:** execute only requested scope (analysis, plan or implementation), with minimal interruptions and real evidence. Human owns high-impact decisions, commit/push, PR merge and release. Never invent ticket details, approvals, test results or community skill invocations.
 
-## Risk routing
-- **T1**: localized, reversible, low-risk fix; concise plan, targeted test, review; no separate approval when implementation was requested.
-- **T2**: bounded feature, new endpoint or business logic; spec and plan, **one combined human approval** before build; unit/integration checks.
-- **T3**: payment, security, auth, concurrent writes, migrations, potential data loss, cross-service architecture; capability boundaries where needed, explicit architecture approval, broader regression, rollback/security checks.
-- If uncertain, classify higher. Reassess on scope change and stop for reapproval.
+## Progressive policy loading
+Load references **at the decision point**, not all at once:
+- Classification: `references/risk-classification.md`
+- Requirement ambiguity / spec: `references/requirement-analysis.md`
+- Phase execution / agent budget: `references/execution-policy.md`
+- Test, gate or environment failure: `references/failure-recovery.md`
+- Review findings: `references/review-triage.md`
+- Compact, recovery or context budget: `references/context-management.md` and `references/resume-protocol.md`
+- Before specialist methodology: `references/community-skills.md`
+- When creating task artifacts: `references/spec-template.md`, `references/plan-template.md`, `references/review-template.md`
 
-## Community methods (do not duplicate)
-Read `references/community-skills.md`. When creating canonical task artifacts, use the installed templates in `references/spec-template.md`, `references/plan-template.md` and `references/review-template.md` as lightweight starting points; adapt them to the task tier, and do not generate unnecessary sections for T1. Prefer **installed** Addy skills for spec, planning, incremental build/TDD and review. Use their methods for the relevant phase; never claim a plugin was invoked when it was not available. If missing, apply the compact built-in fallback below; disclose the fallback. Upstream mandatory gates still apply when using upstream skills. Never allow upstream automatic commits or incompatible artifact overwrites.
+## Lifecycle
+1. **Understand:** read CLAUDE.md/AGENTS.md, user ticket, relevant code/tests and git status. Identify analysis-only vs plan-only vs implementation. Never run beyond requested scope.
+2. **Resume/init:** `python3 .claude/ai-sdlc/scripts/sdlc.py resume ID`; if no state, classify T1/T2/T3 and `init ID --tier Tn`. Never overwrite existing task progress.
+3. **Spec/plan:** T1 brief plan; T2 spec + vertical-slice plan with **one combined human approval**; T3 explicit architecture/contract/rollback decision. Write canonical `docs/ai-sdlc/ID/` artifacts, transition `new → planned`; STOP if awaiting approval.
+4. **Build:** T2/T3 require actual human approval before `approved --human-approved → building`; T1 `planned → building`. Prefer installed Addy methodology, fallback locally when unavailable. Implement/test one slice at a time and persist progress. Default **one agent**.
+5. **Verify:** `building → verifying`. Invoke `sdlc-verify`; run actual relevant checks, record `evidence.json` and `qa-report.md`, then `sdlc.py gate ID`. A gate only validates reported evidence, not independently executed commands.
+6. **Review:** `verifying → reviewing`. Use Addy review method when installed, otherwise focused diff review; record `review.md`. Triage actionable findings, at most **two automatic fix/review cycles** total; escalate unresolved blockers.
+7. **Capture:** only after `reviewing → ready_for_human_review` with passing gate and review. Invoke `sdlc-capture`, dry-run and execute `context_store.py`, inspect generated docs and git diff. Never auto-commit, push, merge or deploy.
 
-## Workflow
-1. **Resume or initialize:** `python3 .claude/ai-sdlc/scripts/sdlc.py resume ID`; if absent, classify and `init ID --tier Tn`. Read existing task artifacts before changing anything.
-2. **Specify:** T1 short acceptance notes. T2/T3 write `docs/ai-sdlc/ID/spec.md`: behavior, assumptions, edge cases, testable acceptance IDs. Ask only blocking questions (batch at most three). Never invent missing ticket content.
-3. **Plan:** write `plan.md`: scope, ordered small vertical slices, likely files, acceptance-to-test mapping, risks, rollback where relevant. T3 add `design.md` with alternatives and architecture decisions. Transition `new → planned`. Stop for required approval.
-4. **Build:** T2/T3 only after explicit user approval: `planned → approved --human-approved → building`. T1 `planned → building`. Implement smallest slice, write failing test where feasible, fix, run targeted checks, update `progress.md`; avoid unrelated edits. Default one agent.
-5. **Verify:** `building → verifying`; invoke `sdlc-verify`. Run real project test commands, record exit codes and acceptance evidence, write qa-report.md; `sdlc.py gate ID` must pass. On failure return to build or stop blocked.
-6. **Review:** `verifying → reviewing`; use installed Addy code-review-and-quality method, or fallback: examine changed diff for correctness, security, concurrency, regression, performance and maintainability; document actionable, evidence-based findings in `review.md`. Maximum **two** automatic fix/review cycles; unresolved blockers escalate. `reviewing → ready_for_human_review` only after gate and review.
-7. **Capture:** invoke `sdlc-capture`, create a curated manifest, dry-run and execute `context_store.py`; inspect Git-local handoff and index. Human reviews PR and documentation.
-
-## Recovery and safety
-Persist `state.json`, `progress.md`, `evidence.json`, `review.md` in the target Git project. After compact, read state, spec, plan, progress, evidence, review and current diff; continue at the recorded phase, never restart blindly. No automatic approval, invented test passes, repeated review loops, or dangerous commands without permission.
-
-## Handoff
-Report tier, actual changes, real test results, remaining risks, knowledge files and exact next human action. A clean AI review is not merge approval.
+## Stop and handoff
+Stop for high-impact unknowns, changed approved scope, missing approval, dangerous/production commands, failed verification without a safe fix, exhausted review budget, or plan-only completion. Handoff tier, phase, changed files, real checks, unresolved risks, next human decision and context paths. On compact, resume from persisted state and current diff; never assume stale evidence is valid.

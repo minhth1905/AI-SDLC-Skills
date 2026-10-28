@@ -16,11 +16,11 @@ Read approved spec/plan, tier, current diff and relevant CI/test configuration. 
 ## Procedure
 1. Map each approved acceptance ID to targeted executable or observable verification. T1 targeted; T2 affected integration; T3 broader risk-specific regression.
 2. Discover exact commands from the project, and run **required** commands via:
-   `python3 .claude/ai-sdlc/scripts/verify_runner.py TASK-ID --name focused-tests -- bundle exec rspec path/to/spec.rb`
+   `python3 {{SDLC_SCRIPT_DIR}}/verify_runner.py TASK-ID --name focused-tests -- bundle exec rspec path/to/spec.rb`
 3. Runner appends a check with real exit code, timestamp and working-tree fingerprint to `docs/ai-sdlc/TASK-ID/evidence.json`. It does **not** set overall status to passed.
 4. Diagnose failed or blocked checks. Rerun after code changes. Never edit required runner check entries by hand to fabricate success.
 5. Inspect actual results, fill `acceptance_criteria` with IDs, status and concrete evidence. Set top-level `status: passed` only when all acceptance IDs and required checks are verified; otherwise leave `not_verified`.
-6. Write `qa-report.md` with executed checks, skipped/manual checks, environment caveats and residual risks. Run `python3 .claude/ai-sdlc/scripts/sdlc.py gate TASK-ID`; if gate fails, stop or return to build.
+6. Write `qa-report.md` with executed checks, skipped/manual checks, environment caveats and residual risks. Run `python3 {{SDLC_SCRIPT_DIR}}/sdlc.py gate TASK-ID`; if gate fails, stop or return to build.
 7. A passing gate is not a substitute for CI, QA signoff, code review or human PR approval.
 
 ## Safety

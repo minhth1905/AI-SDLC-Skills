@@ -24,5 +24,8 @@ jobs:
           mkdir -p /tmp/sdlc-example
           git -C /tmp/sdlc-example init
           python3 scripts/install.py --target /tmp/sdlc-example
+          test -f /tmp/sdlc-example/.agents/skills/sdlc-orchestrate/SKILL.md
+          test -f /tmp/sdlc-example/.agents/ai-sdlc/scripts/context_store.py
+          python3 scripts/install.py --target /tmp/sdlc-example --platform claude
           test -f /tmp/sdlc-example/.claude/commands/sdlc.md
           test -f /tmp/sdlc-example/.claude/ai-sdlc/scripts/context_store.py

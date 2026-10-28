@@ -20,7 +20,7 @@ description: Curate verified, non-sensitive, Git-local implementation knowledge 
 3. Compare reported changed files with repository paths and diff. No fabricated test passes, unstated deployment claims, or unrelated paths.
 4. Redact sensitive material before drafting a manifest. Pattern checks are a backup, not a substitute for review. Do not include raw logs/transcripts/customer data.
 5. Prepare JSON matching `references/capture-manifest.json`. Run:
-   `python3 .claude/ai-sdlc/scripts/context_store.py ID --manifest PATH --dry-run`
+   `python3 {{SDLC_SCRIPT_DIR}}/context_store.py ID --manifest PATH --dry-run`
    Inspect the proposed outputs, then run without `--dry-run` if accurate.
 6. Inspect `docs/ai-sdlc/ID/{implementation,decisions,handoff}.md` and `docs/ai-sdlc/index.md` in `git diff`. Confirm one index entry per task and clearly distinguished observed facts, residual risks and required human review.
 7. Present next human action. Do not automatically commit, push, merge, deploy or edit project-wide instructions/ADRs.
